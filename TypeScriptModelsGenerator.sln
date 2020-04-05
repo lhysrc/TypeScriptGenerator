@@ -3,7 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TypeScriptGenerator", "TypeScriptGenerator\TypeScriptGenerator.fsproj", "{924566FA-6146-435F-A15C-2FD67F7294C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Runner\Runner.csproj", "{CFA86332-63C2-400A-90A3-E0CA22A81EC4}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{924566FA-6146-435F-A15C-2FD67F7294C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{924566FA-6146-435F-A15C-2FD67F7294C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{924566FA-6146-435F-A15C-2FD67F7294C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{924566FA-6146-435F-A15C-2FD67F7294C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA86332-63C2-400A-90A3-E0CA22A81EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA86332-63C2-400A-90A3-E0CA22A81EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA86332-63C2-400A-90A3-E0CA22A81EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA86332-63C2-400A-90A3-E0CA22A81EC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
