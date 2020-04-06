@@ -6,7 +6,12 @@ open System.Text
 
 module internal ConstContentGenerator =
     let generateContent (t: Type) =
-        ""
+        t.GetFields(BindingFlags.Public ||| BindingFlags.Static |||
+                       BindingFlags.FlattenHierarchy)
+        |> Seq.filter (fun fi -> fi.IsLiteral && not fi.IsInitOnly)
+        |> Seq.map (fun fi -> "export " + fi.Name + " = " + string (fi.GetRawConstantValue()))
+        |> String.concat Environment.NewLine
+
 
 
 module internal ModelPropertyGenerator =
@@ -39,9 +44,9 @@ module internal FileGenerator =
             | t when (t.IsAbstract && t.IsSealed) -> ConstContentGenerator.generateContent
             | _ ->  ModelContentGenerator.generateContent
 
-        {
+        {|
             Name = t.Name
             Content = gFunc t
             Type  = t
             FullPath = Path.Combine(root, t.Name)
-        }
+        |}

@@ -13,7 +13,7 @@ namespace Runner
                 "../ts.g",
                 opt=>{ opt.TypeMatcher = x => true; }
             );
-            
+
             Console.WriteLine("Hello World!");
         }
     }

@@ -1,3 +1,10 @@
 {
-    "FSharp.suggestGitignore": false
+    "FSharp.suggestGitignore": false,
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/.DS_Store": true,
+        ".vs/": true,
+        ".idea/": true,
+      },
 }
