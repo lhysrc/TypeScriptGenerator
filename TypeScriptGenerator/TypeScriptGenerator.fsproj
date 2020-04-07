@@ -4,8 +4,14 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Type.fs" />
+    <Compile Include="String.fs" />
+    <Compile Include="TS.fs" />
     <Compile Include="Models.fs" />
-    <Compile Include="TypeScriptFileGenerator.fs" />
+    <Compile Include="FilePathGenerator.fs" />
+    <Compile Include="ContentGenerator.fs" />
+    <Compile Include="FileGenerator.fs" />
     <Compile Include="ModelsGenerator.fs" />
   </ItemGroup>
+  <ItemGroup />
 </Project>

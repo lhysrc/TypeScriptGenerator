@@ -1,12 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TypeScriptGenerator\TypeScriptGenerator.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="QiaoDan.Core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>fdb49097-1d9d-4ab9-a05b-65110313f87d</UserSecretsId>
   </PropertyGroup>
 
 </Project>

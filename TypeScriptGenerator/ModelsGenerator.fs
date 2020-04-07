@@ -9,8 +9,7 @@ module ModelsGenerator =
     let private writeFile path content = 
         let file = FileInfo(path)
         if not file.Directory.Exists then file.Directory.Create();
-        File.WriteAllText(path,content)
-
+        File.WriteAllText(path, content)
         
     let create (assemblies : Assembly seq, 
                 destinationPath:string, 
@@ -18,8 +17,16 @@ module ModelsGenerator =
         let opts = Options()
         optionAction.Invoke opts
 
+        let sw = System.Diagnostics.Stopwatch()
+        sw.Start()
+
         assemblies 
         |> Seq.collect (fun a -> a.ExportedTypes)
-        |> Seq.filter (if opts.TypeMatcher |> isNull then fun _ -> true else FuncConvert.FromFunc opts.TypeMatcher)
+        |> Seq.filter (fun t -> isNull t.DeclaringType)
+        |> Seq.filter (if isNull opts.TypeMatcher then fun _ -> true else FuncConvert.FromFunc opts.TypeMatcher)
         |> Seq.map (generateFile destinationPath)
+        |> Seq.filter (fun f -> String.IsNullOrWhiteSpace f.Content |> not)
         |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))
+        
+        sw.Stop()
+        printf "生成文件耗时%f毫秒"  sw.Elapsed.TotalMilliseconds
