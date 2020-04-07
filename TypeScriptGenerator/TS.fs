@@ -1,5 +1,4 @@
 ﻿module TS
-
 open System
 open System.Collections.Generic
 
@@ -52,55 +51,57 @@ let systemTypes = [
     {Key = typeof<DateTimeOffset>;Value = "Date"}
     {Key = typeof<Nullable<DateTimeOffset>>;Value = "Date"}
 ]
-
-let rec isArray (t:Type)=
+let private cache = dict Seq.empty<Type * string>;
+let rec getArrayType (t:Type)=
     if t.IsGenericType then
         t.GetInterfaces() 
         |> Array.append [| t |]
         |> Array.tryFind(fun i-> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<IEnumerable<_>>)
         |> function 
-        | Some i -> true,getTypeName i.GenericTypeArguments.[0]
-        | None -> false, null
+        | Some i -> Some (getTypeName i.GenericTypeArguments.[0])
+        | None -> None
     else if t.IsArray && t.HasElementType then
-        true, getTypeName (t.GetElementType())
+        Some (getTypeName (t.GetElementType()))
     else
-        false, null
+        None
 
-and isMap (t:Type) = //todo 使用[key:string]:TypeName??
+and getMapType (t:Type) = //todo 使用[key:string]:TypeName??
     printfn "%s" t.Name
     if t.IsGenericType then
         t.GetInterfaces() 
         |> Array.append [| t |]
         |> Array.tryFind(fun i-> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<IDictionary<_,_>>)
         |> function 
-        | Some i -> true,getTypeName i.GenericTypeArguments.[0],getTypeName i.GenericTypeArguments.[1]
-        | None -> false, null, null
+        | Some i -> Some(getTypeName i.GenericTypeArguments.[0],getTypeName i.GenericTypeArguments.[1])
+        | None -> None
     else
-        false, null, null
+        None
     
-and getTypeName (t:Type)=   
+and getTypeName (t:Type) =
     let tsType = systemTypes |> List.tryFind (fun st -> st.Key = t)
     match tsType with
     | Some t -> t.Value
     | None -> 
-        match isMap t with
-        | true,k,v -> sprintf "Map<%s,%s>" k v
-        | false,_,_ ->
-            match isArray t with
-            | true, name -> name + "[]"
-            | false, _ -> 
+        match getMapType t with
+        | Some (k,v) -> sprintf "Map<%s,%s>" k v
+        | None ->
+            match getArrayType t with
+            | Some name -> name + "[]"
+            | None -> 
                 match t.IsGenericType with
-                | true ->                 
-                    let args = 
-                        t.GetGenericArguments()
-                        |> Seq.map getTypeName
-                        |> String.concat ","
-                    String.concat "" [                    
-                        getName t
-                        "<"
-                        args
-                        ">"
-                    ]
-                | false -> getName t
+                | true ->    
+                    if t.GetGenericTypeDefinition() = typedefof<Nullable<_>> then Type.getName (t.GetGenericArguments().[0])
+                    else
+                        let args = 
+                            t.GetGenericArguments()
+                            |> Seq.map getTypeName
+                            |> String.concat ","
+                        String.concat "" [                    
+                            Type.getName t
+                            "<"
+                            args
+                            ">"
+                        ]
+                | false -> Type.getName t
                 
      

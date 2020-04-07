@@ -28,7 +28,7 @@ module internal EnumContentGenerator =
             Enum.GetValues(t) 
             |> unbox
             |> Seq.map (fun e -> sprintf "%s = %i" (Enum.GetName(t, e)) e)
-            |> String.concat ","
+            |> String.concat ("," + Environment.NewLine)
 
 
         String.concat Environment.NewLine [
@@ -51,8 +51,8 @@ module internal ConstContentGenerator =
 module internal ModelPropertyGenerator =    
 
     let generatorProp (p:PropertyInfo) =
-        let name = p.Name
-        let typeName = TS.getTypeName p.PropertyType |> String.toCamelCase
+        let name = p.Name |> String.toCamelCase
+        let typeName = TS.getTypeName p.PropertyType
 
         String.concat "" [
             name

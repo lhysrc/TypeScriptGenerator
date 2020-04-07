@@ -24,6 +24,9 @@ module ModelsGenerator =
         |> Seq.collect (fun a -> a.ExportedTypes)
         |> Seq.filter (fun t -> isNull t.DeclaringType)
         |> Seq.filter (if isNull opts.TypeMatcher then fun _ -> true else FuncConvert.FromFunc opts.TypeMatcher)
+        |> Seq.collect Type.getUsedTypes
+        |> Seq.filter (fun t -> not( List.exists (fun (i:TS.SystemType) -> i.Key = t) TS.systemTypes))
+        |> Seq.distinct
         |> Seq.map (generateFile destinationPath)
         |> Seq.filter (fun f -> String.IsNullOrWhiteSpace f.Content |> not)
         |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))

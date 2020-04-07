@@ -48,4 +48,32 @@ let toKebabCase (s:string) =
     sb.ToString()
 
 let toCamelCase (s:string) =
-    s
+    if String.IsNullOrEmpty(s) || not <| Char.IsUpper(s.[0]) then
+        s
+    else
+        let chars = s.ToCharArray()
+        let breaks = 
+            chars        
+            |> Array.mapi (fun i c ->
+                if i = 1 && not <| Char.IsUpper s.[i] then 
+                    true, c
+                else
+                    let hasNext = (i + 1 < s.Length)
+                    if i > 0 && hasNext && not <| Char.IsUpper s.[i + 1] then   
+                        true,
+                            if Char.IsSeparator(s.[i + 1]) then 
+                                Char.ToLowerInvariant c
+                            else 
+                                c
+                    
+                    else
+                        false, Char.ToLowerInvariant c
+            )
+        let index = Array.tryFindIndex (fun (b,c) -> b) breaks
+        match index with
+        | Some i ->
+            Array.append 
+                (Array.take i breaks |> Array.map (fun (_,c)->c))
+                (Array.skip i chars)
+        | None -> Array.map (fun (_,c)->c) breaks
+        |> String

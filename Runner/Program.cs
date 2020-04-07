@@ -21,6 +21,8 @@ namespace Runner
                 "QiaoDan.Core.dll",
                 "QiaoDan.ViewModels.Abstractions.dll",
                 "QiaoDan.Admin.ViewModels.dll",
+                "QiaoDan.OA.ViewModels.dll",
+                "QiaoDan.HR.ViewModels.dll",
             };
 
             ModelsGenerator.create(

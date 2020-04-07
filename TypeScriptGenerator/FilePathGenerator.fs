@@ -8,9 +8,7 @@ module internal FilePathGenerator =
         String.toKebabCase name
 
     let getFileName (t:Type) =        
-        if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
-        then t.Name.Substring(1)
-        else Type.getName t
+        Type.getName t
         |> String.toKebabCase
 
     let generatePath (t:Type) =
