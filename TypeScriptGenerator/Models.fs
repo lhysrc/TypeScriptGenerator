@@ -6,5 +6,5 @@ type Options () =
 
 type TypeOption = {
     Type : Type
-    UsedTypes : Type[]
+    //UsedTypes : Type seq
 }

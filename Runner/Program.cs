@@ -30,7 +30,7 @@ namespace Runner
                 "../ts.g",
                 opt => 
                 { 
-                    opt.TypeMatcher = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed); 
+                    opt.TypeMatcher = t => t.GetInterface("IViewModel") != null /*|| t.IsEnum || (t.IsAbstract && t.IsSealed)*/;
                 }
             );
         }

@@ -1,4 +1,5 @@
 ﻿module TS
+open Type
 open System
 open System.Collections.Generic
 
@@ -7,7 +8,7 @@ type SystemType = {
     Value :string
 }
 
-let systemTypes = [
+let private buildinTypes = [
     {Key = typeof<Void>;Value = "void"}
     {Key = typeof<obj>;Value = "object"}
 
@@ -52,49 +53,35 @@ let systemTypes = [
     {Key = typeof<Nullable<DateTimeOffset>>;Value = "Date"}
 ]
 let private cache = dict Seq.empty<Type * string>;
-let rec getArrayType (t:Type)=
-    if t.IsGenericType then
-        t.GetInterfaces() 
-        |> Array.append [| t |]
-        |> Array.tryFind(fun i-> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<IEnumerable<_>>)
-        |> function 
-        | Some i -> Some (getTypeName i.GenericTypeArguments.[0])
-        | None -> None
-    else if t.IsArray && t.HasElementType then
-        Some (getTypeName (t.GetElementType()))
-    else
-        None
+   
+let isBuildIn (t:Type) =
+    buildinTypes |> List.exists (fun i->i.Key = t)
 
-and getMapType (t:Type) = //todo 使用[key:string]:TypeName??
-    printfn "%s" t.Name
-    if t.IsGenericType then
-        t.GetInterfaces() 
-        |> Array.append [| t |]
-        |> Array.tryFind(fun i-> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<IDictionary<_,_>>)
-        |> function 
-        | Some i -> Some(getTypeName i.GenericTypeArguments.[0],getTypeName i.GenericTypeArguments.[1])
-        | None -> None
-    else
-        None
-    
-and getTypeName (t:Type) =
-    let tsType = systemTypes |> List.tryFind (fun st -> st.Key = t)
+let addUsedType (ts:Type HashSet) (t:Type) =
+    let t' = unwrap t
+    if isBuildIn t' then ()
+    else ts.Add t' |> ignore
+
+let rec getTypeName (useds:Type HashSet) (t:Type):string =
+    addUsedType useds t
+    let tsType = buildinTypes |> List.tryFind (fun st -> st.Key = t)
     match tsType with
     | Some t -> t.Value
     | None -> 
         match getMapType t with
-        | Some (k,v) -> sprintf "Map<%s,%s>" k v
+        | Some (k,v) -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
         | None ->
             match getArrayType t with
-            | Some name -> name + "[]"
+            | Some t -> (getTypeName useds t) + "[]"
             | None -> 
                 match t.IsGenericType with
                 | true ->    
-                    if t.GetGenericTypeDefinition() = typedefof<Nullable<_>> then Type.getName (t.GetGenericArguments().[0])
+                    if t.GetGenericTypeDefinition() = typedefof<Nullable<_>> then 
+                        Type.getName (t.GetGenericArguments().[0])
                     else
                         let args = 
                             t.GetGenericArguments()
-                            |> Seq.map getTypeName
+                            |> Seq.map (getTypeName useds)
                             |> String.concat ","
                         String.concat "" [                    
                             Type.getName t
