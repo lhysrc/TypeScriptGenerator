@@ -64,7 +64,7 @@ module internal ModelContentGenerator =
     let generateImport (currentPath:string) (t:Type) =
         let usedPath = FilePathGenerator.generatePath t
         let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
-        sprintf "import {%s} from '%s';" (Type.getName t) relativePath
+        sprintf "import { %s } from '%s';" (Type.getName t) relativePath
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
 

@@ -68,7 +68,7 @@ let (|TSBuildIn|_|) (t:Type) =
     buildinTypes |> List.tryFind (fun i->i.Key = t)
 
 let (|TSTuple|_|) (t:Type) =
-    if Reflection.FSharpType.IsTuple t then Some t
+    if Reflection.FSharpType.IsTuple t then Some (Reflection.FSharpType.GetTupleElements t)
     else None
 
 let (|TSMap|_|) (t:Type) = 
@@ -80,7 +80,12 @@ let (|TSArray|_|) (t:Type) =
 let rec getTypeName (useds:Type HashSet) (t:Type):string =    
     match (unwrap t) with
     | TSBuildIn t -> t.Value
-    | TSTuple t -> "[]"
+    | TSTuple ts -> 
+        "[ " + (
+            ts 
+            |> Array.map (getTypeName useds)
+            |> String.concat ", "
+        ) + " ]"
     | TSMap (k,v) -> 
         match k with
         | k when k = typeof<string> -> "{ [key:string]: " + (getTypeName useds v) + " }"
