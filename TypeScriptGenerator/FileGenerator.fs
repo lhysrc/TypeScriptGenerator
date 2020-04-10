@@ -16,6 +16,7 @@ module internal FileGenerator =
         let o :TypeOption = {
             Type = t
             //UsedTypes = getUsedTypes' allTypes t
+            Path = FilePathGenerator.generatePath t
         }
         let gFunc =
             match o.Type with
@@ -26,9 +27,7 @@ module internal FileGenerator =
         let (content, useds) = gFunc o
 
         {|
-            // Name = o.Name
+            FullPath = Path.Combine(root, o.Path + ".ts")
             Content = content
-            Type  = o.Type
-            FullPath = Path.Combine(root, FilePathGenerator.generatePath(o.Type) + ".ts")
-            UsedTypes = useds |> Seq.filter Type.loadedTypes.Contains |> Seq.filter (not << TS.isBuildIn)
+            UsedTypes = useds
         |}

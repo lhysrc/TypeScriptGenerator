@@ -16,7 +16,7 @@ module internal Common =
             | _ ->  "class"
         
         let extendString = 
-            if isNull t.BaseType || TS.isBuildIn t.BaseType then String.Empty
+            if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then String.Empty
             else "extends " + TS.getTypeName ts t.BaseType
 
         String.concat " " [
@@ -62,7 +62,9 @@ module internal ConstContentGenerator =
 module internal ModelContentGenerator =   
 
     let generateImport (currentPath:string) (t:Type) =
-        sprintf "import {%s} from '%s';" (Type.getName t) "."
+        let usedPath = FilePathGenerator.generatePath t
+        let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
+        sprintf "import {%s} from '%s';" (Type.getName t) relativePath
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
         TS.addUsedType ts p.PropertyType
@@ -78,23 +80,24 @@ module internal ModelContentGenerator =
         ]
 
     let generateContent (o: TypeOption) =
-        let usedTypes = Type.getUsedTypes o.Type        
+        let usedTypes'Self = Type.getUsedTypes o.Type        
 
         let t = o.Type
-        let typeName = generateExportType usedTypes t
+        let typeName = generateExportType usedTypes'Self t
         let props = 
             t.GetProperties()
-            |> Seq.map (generateProp usedTypes)
+            |> Seq.filter (fun p -> p.DeclaringType = t)
+            |> Seq.map (generateProp usedTypes'Self)
             |> String.concat Environment.NewLine
 
-        let imports =
-            usedTypes
-            |> Seq.filter (fun u -> u <> t)
-            |> Seq.map (generateImport "")
+        let usedTypes = usedTypes'Self |> Seq.filter (fun u -> u <> t)
+        let imports = 
+            usedTypes            
+            |> Seq.map (generateImport o.Path)
             |> String.concat Environment.NewLine
         String.concat Environment.NewLine [
             imports
             typeName
             props
             "}"
-        ], usedTypes :> Type seq
+        ], usedTypes

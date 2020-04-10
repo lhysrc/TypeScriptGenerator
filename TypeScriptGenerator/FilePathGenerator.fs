@@ -17,3 +17,16 @@ module internal FilePathGenerator =
             |> Seq.map getDirName
             |> String.concat (string Path.DirectorySeparatorChar)
         Path.Combine (dir, getFileName t)
+
+    let getRelativePath relativeTo path =
+        let uri = Uri (relativeTo |> Path.GetFullPath);
+        let mutable rel = 
+            uri.MakeRelativeUri (Uri(path |> Path.GetFullPath))
+            |> string
+            |> Uri.UnescapeDataString
+        rel <- rel.Replace ('\\', '/')
+        if not (rel.Contains ("/")) then
+            "./" + rel
+        else
+            rel
+    

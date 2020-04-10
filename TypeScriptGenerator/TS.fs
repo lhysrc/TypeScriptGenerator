@@ -62,6 +62,40 @@ let addUsedType (ts:Type HashSet) (t:Type) =
     if isBuildIn t' then ()
     else ts.Add t' |> ignore
 
+
+
+let (|TSBuildIn|_|) (t:Type) = 
+    buildinTypes |> List.tryFind (fun i->i.Key = t)
+
+let (|TSMap|_|) (t:Type) = 
+    getMapType t
+    
+let (|TSArray|_|) (t:Type) = 
+    getArrayType t
+
+let rec getTypeName (useds:Type HashSet) (t:Type):string =
+    addUsedType useds t
+    let under = Nullable.GetUnderlyingType t
+    match (if isNull under then t else under) with
+    | TSBuildIn t -> t.Value
+    | TSMap (k,v) -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
+    | TSArray t -> (getTypeName useds t) + "[]"
+    | _ -> 
+        match t.IsGenericType with
+        | true ->   
+            let args = 
+                t.GetGenericArguments()
+                |> Seq.map (getTypeName useds)
+                |> String.concat ","
+            String.concat "" [                    
+                Type.getName t
+                "<"
+                args
+                ">"
+            ]
+        | false -> Type.getName t
+
+(*
 let rec getTypeName (useds:Type HashSet) (t:Type):string =
     addUsedType useds t
     let tsType = buildinTypes |> List.tryFind (fun st -> st.Key = t)
@@ -91,4 +125,4 @@ let rec getTypeName (useds:Type HashSet) (t:Type):string =
                         ]
                 | false -> Type.getName t
                 
-     
+*)
