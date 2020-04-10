@@ -2,7 +2,7 @@
 open System
 open System.Collections.Generic
 
-let internal loadedTypes = HashSet<Type>()
+let internal generatedTypes = HashSet<Type>()
 let internal usedTypes = Dictionary<Type,HashSet<Type>>()
 let getUsedTypes (t:Type) =
     match usedTypes.TryGetValue t with
@@ -16,12 +16,13 @@ let isStatic (t:Type) =
     t.IsAbstract && t.IsSealed
 
 let getName (t:Type) =    
-    if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
-    then t.Name.Substring(1)
-    else 
-        let name = t.Name
+    let trimGeneric (name:string) = 
         let num = name.IndexOf('`');
         if num > -1 then name.Substring(0, num) else name
+    if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
+    then trimGeneric (t.Name.Substring(1))
+    else 
+        trimGeneric t.Name
      
 let getArrayType (t:Type)=
     if t.IsGenericType then

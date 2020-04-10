@@ -29,6 +29,8 @@ module internal FileGenerator =
         
         let (content, useds) = gFunc o
 
+        Type.generatedTypes.Add t |> ignore
+
         {
             FullPath = Path.Combine(root, o.Path + ".ts")
             Content = content

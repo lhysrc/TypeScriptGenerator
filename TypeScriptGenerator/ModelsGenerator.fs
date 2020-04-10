@@ -7,16 +7,20 @@ open FileGenerator
 
 module ModelsGenerator =
     let private writeFile path content = 
-        //printfn "%s" path
+        printfn "%s" path
         let file = FileInfo(path)
         if not file.Directory.Exists then file.Directory.Create();
         File.WriteAllText(path, content)
     
     let rec generateUsedTypeFiles (destinationPath:string) (ts:Type seq) = 
-        let f = Seq.map (fun t -> generateFile destinationPath t) ts
-        f
+        let files =
+            ts 
+            |> Seq.filter (fun t -> not (Type.generatedTypes.Contains t))
+            |> Seq.map (fun t -> generateFile destinationPath t)
+        
+        files
         |> Seq.collect (fun t -> generateUsedTypeFiles destinationPath t.UsedTypes)        
-        |> Seq.append f
+        |> Seq.append files
 
     let create (assemblies : Assembly seq, 
                 destinationPath:string, 
@@ -30,7 +34,6 @@ module ModelsGenerator =
         let loadedTypes =
             assemblies 
             |> Seq.collect (fun a -> a.ExportedTypes)
-        Type.loadedTypes.UnionWith loadedTypes
 
         let matcheds =
             loadedTypes

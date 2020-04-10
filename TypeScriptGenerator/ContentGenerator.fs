@@ -16,12 +16,31 @@ module internal Common =
         let extendString = 
             if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then String.Empty
             else "extends " + TS.getTypeName ts t.BaseType
+        
+        let implString =
+            if t.IsEnum then String.Empty
+            else 
+                let ifs = t.GetInterfaces()
+                let baseIfs = if isNull t.BaseType then Array.empty<Type> else t.BaseType.GetInterfaces()
+                let ifsString =
+                    ifs
+                    |> Seq.except baseIfs
+                    |> Seq.map (TS.getTypeName ts)
+                    |> String.concat ", "
+
+                let key = if t.IsClass then "implements " else "extends "
+                if String.IsNullOrEmpty ifsString then 
+                    String.Empty 
+                else 
+                    key + ifsString
+                
 
         String.concat " " [
             "export"
             typeString
             TS.getTypeName ts t
             extendString
+            implString
             "{"
         ]
 
@@ -43,7 +62,7 @@ module internal EnumContentGenerator =
             TS.indent + fields
             "}"
         ]
-        ,Seq.empty<Type>
+        ,List.empty<Type>
 
 module internal ConstContentGenerator =
     let private getConstValue (fi:FieldInfo) =
@@ -54,7 +73,7 @@ module internal ConstContentGenerator =
         |> Seq.filter (fun fi -> fi.IsLiteral && not fi.IsInitOnly)
         |> Seq.map (fun fi -> sprintf "export const %s = %s;" fi.Name (getConstValue fi))
         |> String.concat Environment.NewLine
-        ,Seq.empty<Type>
+        ,List.empty<Type>
 
 
 module internal ModelContentGenerator =   
@@ -77,17 +96,19 @@ module internal ModelContentGenerator =
         ]
 
     let generateContent (o: TypeOption) =
-        let usedTypes'Self = Type.getUsedTypes o.Type        
+        let ``usedTypes&Self`` = Type.getUsedTypes o.Type        
 
         let t = o.Type
-        let typeName = generateExportType usedTypes'Self t
+        let typeName = generateExportType ``usedTypes&Self`` t
         let props = 
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
-            |> Seq.map (generateProp usedTypes'Self)
+            |> Seq.map (generateProp ``usedTypes&Self``)
             |> String.concat (Environment.NewLine + TS.indent)
-
-        let usedTypes = usedTypes'Self |> Seq.filter (fun u -> u <> t)
+        
+        printfn "%s" "-------------"
+        printfn "%s" o.Type.Name
+        let usedTypes = ``usedTypes&Self`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
         let imports = 
             usedTypes            
             |> Seq.map (generateImport o.Path)
