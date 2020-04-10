@@ -33,16 +33,16 @@ module internal EnumContentGenerator =
         let t = o.Type
         let typeName = generateExportType usedTypes t
 
-        let props = 
+        let fields = 
             Enum.GetValues(t) 
             |> unbox
             |> Seq.map (fun e -> sprintf "%s = %i" (Enum.GetName(t, e)) e)
-            |> String.concat ("," + Environment.NewLine)
+            |> String.concat ("," + Environment.NewLine + TS.indent)
 
 
         String.concat Environment.NewLine [
             typeName
-            props
+            TS.indent + fields
             "}"
         ]
         ,Seq.empty<Type>
@@ -87,7 +87,7 @@ module internal ModelContentGenerator =
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
             |> Seq.map (generateProp usedTypes'Self)
-            |> String.concat Environment.NewLine
+            |> String.concat (Environment.NewLine + TS.indent)
 
         let usedTypes = usedTypes'Self |> Seq.filter (fun u -> u <> t)
         let imports = 
@@ -97,6 +97,6 @@ module internal ModelContentGenerator =
         String.concat Environment.NewLine [
             imports
             typeName
-            props
+            TS.indent + props
             "}"
         ], usedTypes

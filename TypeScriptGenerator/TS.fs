@@ -7,7 +7,7 @@ type SystemType = {
     Key : Type
     Value :string
 }
-
+let indent = "  ";
 let private buildinTypes = [
     {Key = typeof<Void>;Value = "void"}
     {Key = typeof<obj>;Value = "any"}
