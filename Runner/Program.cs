@@ -23,8 +23,10 @@ namespace Runner
                 "QiaoDan.Core.dll",
                 "QiaoDan.ViewModels.Abstractions.dll",
                 "QiaoDan.Admin.ViewModels.dll",
-                //"QiaoDan.OA.ViewModels.dll",
-                //"QiaoDan.HR.ViewModels.dll",
+                "QiaoDan.OA.Core.dll",
+                "QiaoDan.OA.ViewModels.dll",
+                "QiaoDan.HR.Core.dll",
+                "QiaoDan.HR.ViewModels.dll",
             };
 
             ModelsGenerator.create(
@@ -61,6 +63,7 @@ namespace Runner
     public class GenericItem<TStuff>
     {
         public TStuff Stuff { get; set; }
+        public GenericItem<TStuff> Circle { get; set; }
     }
 
     public class BaseItem
@@ -68,8 +71,10 @@ namespace Runner
         public ImportMe Imported { get; set; }
     }
 
-    public static class Helper
+    public static class Static
     {
+        public const string ConstString = "ConstString";
+        public const int ConstInt = 1314520;
         public static void Help() { }
     }
 

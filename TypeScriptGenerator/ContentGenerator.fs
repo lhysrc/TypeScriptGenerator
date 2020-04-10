@@ -1,8 +1,6 @@
 ﻿namespace TypeScriptGenerator
 open System
-open System.IO
 open System.Reflection
-open System.Text
 open System.Collections.Generic
 
 [<AutoOpen>]

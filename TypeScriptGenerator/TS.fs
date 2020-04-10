@@ -81,14 +81,14 @@ let rec getTypeName (useds:Type HashSet) (t:Type):string =
     match (unwrap t) with
     | TSBuildIn t -> t.Value
     | TSTuple ts -> 
-        "[ " + (
+        "[" + (
             ts 
             |> Array.map (getTypeName useds)
             |> String.concat ", "
-        ) + " ]"
+        ) + "]"
     | TSMap (k,v) -> 
         match k with
-        | k when k = typeof<string> -> "{ [key:string]: " + (getTypeName useds v) + " }"
+        | k when k = typeof<string> -> "{ [key: string]: " + (getTypeName useds v) + " }"
         | _ -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
     | TSArray t -> (getTypeName useds t) + "[]"
     | t -> 
