@@ -5,20 +5,11 @@ open System.Collections.Generic
 
 module internal FileGenerator =
 
-    //let rec private getUsedTypes' (loadeds:Type seq) (t:Type) =
-    //    let useds = t |> Type.getUsedTypes loadeds
-    //    useds 
-    //    |> Seq.filter (not << TS.isBuildIn) //todo µÝ¹é»ñÈ¡
-    //    //|> Seq.collect (getUsedTypes' loadeds)
-    //    //|> Seq.append useds
-    //    //|> Seq.distinct
-
     let private cache = Dictionary<Type, TSFile>()
 
-    let private generateFile' (root:string) (t:Type) =         
+    let private generateFile' (rootDir:string) (t:Type) =         
         let o :TypeOption = {
             Type = t
-            //UsedTypes = getUsedTypes' allTypes t
             Path = FilePathGenerator.generatePath t
         }
         let gFunc =
@@ -32,7 +23,7 @@ module internal FileGenerator =
         Type.generatedTypes.Add t |> ignore
 
         {
-            FullPath = Path.Combine(root, o.Path + ".ts")
+            FullPath = Path.Combine(rootDir, o.Path + ".ts")
             Content = content
             UsedTypes = useds
         }

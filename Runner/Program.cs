@@ -18,7 +18,7 @@ namespace Runner
             var configuration = builder.Build();
             var root = configuration["root"];
 
-            var asmNames = new[]
+            var asmNames = new string[]
             {
                 "QiaoDan.Core.dll",
                 "QiaoDan.ViewModels.Abstractions.dll",
@@ -27,7 +27,8 @@ namespace Runner
                 "QiaoDan.OA.ViewModels.dll",
                 "QiaoDan.HR.Core.dll",
                 "QiaoDan.HR.ViewModels.dll",
-            };
+            }
+            ;
 
             ModelsGenerator.create(
                 asmNames.Select(n => Assembly.LoadFrom(Path.Combine(root, n))).Append(typeof(Program).Assembly),
@@ -60,15 +61,17 @@ namespace Runner
         public string RenameMe { get; set; }
     }
 
-    public class GenericItem<TStuff>
+    public class GenericItem<TStuff> : IImportMe2<Item>
     {
         public TStuff Stuff { get; set; }
         public GenericItem<TStuff> Circle { get; set; }
+        public Item X { get; set; }
     }
 
-    public class BaseItem
+    public class BaseItem : IImportMe2<Item>
     {
-        public ImportMe Imported { get; set; }
+        public ImportMe1 Imported { get; set; }
+        public Item X { get; set; }
     }
 
     public static class Static
@@ -78,15 +81,20 @@ namespace Runner
         public static void Help() { }
     }
 
-    interface IViewModel
+    interface IViewModel: IImportMe2<Item>
     {
 
     }
 }
 namespace Runner.ForImport
 {
-    public class ImportMe
+    public class ImportMe1
     {
         public int Id { get; set; }
+    }
+
+    public interface IImportMe2<T>
+    {
+        public T X { get; set; }
     }
 }

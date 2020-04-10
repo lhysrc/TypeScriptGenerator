@@ -4,6 +4,7 @@ open System.Collections.Generic
 
 let internal generatedTypes = HashSet<Type>()
 let internal usedTypes = Dictionary<Type,HashSet<Type>>()
+
 let getUsedTypes (t:Type) =
     match usedTypes.TryGetValue t with
     | true,v -> v
@@ -15,14 +16,19 @@ let getUsedTypes (t:Type) =
 let isStatic (t:Type) =
     t.IsAbstract && t.IsSealed
 
+/// 名字+泛型参数个数
+let getName'n (t:Type) =
+    if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
+    then t.Name.Substring(1)
+    else 
+        t.Name
+
 let getName (t:Type) =    
     let trimGeneric (name:string) = 
         let num = name.IndexOf('`');
         if num > -1 then name.Substring(0, num) else name
-    if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
-    then trimGeneric (t.Name.Substring(1))
-    else 
-        trimGeneric t.Name
+   
+    t |> getName'n |> trimGeneric
      
 let getArrayType (t:Type)=
     if t.IsGenericType then
@@ -37,7 +43,7 @@ let getArrayType (t:Type)=
     else
         None
 
-let getMapType (t:Type) = //todo 使用[key:string]:TypeName??
+let getMapType (t:Type) =
     if t.IsGenericType then
         t.GetInterfaces() 
         |> Array.append [| t |]
@@ -52,19 +58,3 @@ let getMapType (t:Type) = //todo 使用[key:string]:TypeName??
 let unwrap (t:Type) =
     let under = Nullable.GetUnderlyingType t 
     if isNull under then t else under
-
-//let getUsedTypes (allTypes:Type seq) (t:Type)  =
-//    if isStatic t then 
-//        Seq.empty
-//    else
-//        // printfn "%s" t.Name
-//        let ts =
-//            (HashSet<Type> (seq {
-//                yield! t.GetProperties() |> Seq.map (fun p->p.PropertyType)
-//                yield! t.GetInterfaces()
-//                yield! t.GenericTypeArguments
-//                yield t.BaseType
-//            }))
-//            |> Seq.filter (fun u -> u <> t && not (isNull u) && Seq.contains t allTypes)
-//            |> Seq.map unwrap
-//        ts

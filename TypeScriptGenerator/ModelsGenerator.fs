@@ -7,20 +7,20 @@ open FileGenerator
 
 module ModelsGenerator =
     let private writeFile path content = 
-        printfn "%s" path
+        // printfn "%s" path
         let file = FileInfo(path)
         if not file.Directory.Exists then file.Directory.Create();
         File.WriteAllText(path, content)
     
-    let rec generateUsedTypeFiles (destinationPath:string) (ts:Type seq) = 
+    let rec generateUsedTypeFiles (destinationPath:string) (ts:Type list) = 
         let files =
             ts 
-            |> Seq.filter (fun t -> not (Type.generatedTypes.Contains t))
-            |> Seq.map (fun t -> generateFile destinationPath t)
+            |> List.filter (fun t -> not (Type.generatedTypes.Contains t))
+            |> List.map (fun t -> generateFile destinationPath t)
         
         files
-        |> Seq.collect (fun t -> generateUsedTypeFiles destinationPath t.UsedTypes)        
-        |> Seq.append files
+        |> List.collect (fun t -> generateUsedTypeFiles destinationPath t.UsedTypes)        
+        |> List.append files
 
     let create (assemblies : Assembly seq, 
                 destinationPath:string, 

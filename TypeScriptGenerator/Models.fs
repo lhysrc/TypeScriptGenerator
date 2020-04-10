@@ -12,5 +12,5 @@ type TypeOption = {
 type TSFile = {
     FullPath : string
     Content :string
-    UsedTypes : Type seq
+    UsedTypes : Type list
 }

@@ -8,7 +8,7 @@ module internal FilePathGenerator =
         String.toKebabCase name
 
     let getFileName (t:Type) =        
-        Type.getName t
+        Type.getName'n t
         |> String.toKebabCase
 
     let generatePath (t:Type) =

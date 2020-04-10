@@ -4,7 +4,7 @@ open System.Reflection
 open System.Collections.Generic
 
 [<AutoOpen>]
-module internal Common =
+module private ContentGenerator =
     let generateExportType (ts:Type HashSet) (t: Type) =
         let typeString = 
             match t with
@@ -106,8 +106,8 @@ module internal ModelContentGenerator =
             |> Seq.map (generateProp ``usedTypes&Self``)
             |> String.concat (Environment.NewLine + TS.indent)
         
-        printfn "%s" "-------------"
-        printfn "%s" o.Type.Name
+        //printfn "%s" "-------------"
+        //printfn "%s" o.Type.Name
         let usedTypes = ``usedTypes&Self`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
         let imports = 
             usedTypes            
