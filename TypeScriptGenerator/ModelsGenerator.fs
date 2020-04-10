@@ -12,7 +12,7 @@ module ModelsGenerator =
         if not file.Directory.Exists then file.Directory.Create();
         File.WriteAllText(path, content)
     
-    let rec generateUsedTypeFiles (destinationPath:string) (ts:Type list) = 
+    let rec private generateUsedTypeFiles (destinationPath:string) (ts:Type list) = 
         let files =
             ts 
             |> List.filter (fun t -> not (Type.generatedTypes.Contains t))
@@ -22,9 +22,10 @@ module ModelsGenerator =
         |> List.collect (fun t -> generateUsedTypeFiles destinationPath t.UsedTypes)        
         |> List.append files
 
-    let create (assemblies : Assembly seq, 
-                destinationPath:string, 
-                optionAction:Action<Options>) =
+    [<CompiledName("Generate")>]
+    let generate (assemblies : Assembly seq, 
+                  destinationPath:string, 
+                  optionAction:Action<Options>) =
         let opts = Options()
         optionAction.Invoke opts
 

@@ -68,6 +68,8 @@ module internal ConstContentGenerator =
     let private getConstValue (fi:FieldInfo) =
         sprintf "%A" (fi.GetRawConstantValue())
 
+    //todo 生成内部类
+
     let generateContent (t: TypeOption) =
         t.Type.GetFields(BindingFlags.Public ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy)
         |> Seq.filter (fun fi -> fi.IsLiteral && not fi.IsInitOnly)
@@ -82,6 +84,7 @@ module internal ModelContentGenerator =
         let usedPath = FilePathGenerator.generatePath t
         let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
         sprintf "import { %s } from '%s';" (Type.getName t) relativePath
+        //todo 同名泛型类型引入？
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
 

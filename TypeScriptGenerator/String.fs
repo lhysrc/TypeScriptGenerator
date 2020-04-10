@@ -5,10 +5,10 @@ open System
 open System.Text
 
 type CaseState =
-| Start
-| Lower
-| Upper
-| NewWord
+| Start = 0
+| Lower = 1
+| Upper = 2
+| NewWord = 3
 
 let inline private append (sb:StringBuilder) (value:'a) =
     ignore <| sb.Append value

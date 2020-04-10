@@ -30,7 +30,7 @@ namespace Runner
             }
             ;
 
-            ModelsGenerator.create(
+            ModelsGenerator.Generate(
                 asmNames.Select(n => Assembly.LoadFrom(Path.Combine(root, n))).Append(typeof(Program).Assembly),
                 "../ts.g",
                 opt => 

@@ -4,12 +4,12 @@ open System
 type Options () = 
     member val TypeMatcher: Func<Type,bool> = null with get, set
 
-type TypeOption = {
+type internal TypeOption = {
     Type : Type
     Path : string
 }
 
-type TSFile = {
+type internal TSFile = {
     FullPath : string
     Content :string
     UsedTypes : Type list
