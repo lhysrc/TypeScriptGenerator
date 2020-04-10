@@ -67,7 +67,6 @@ module internal ModelContentGenerator =
         sprintf "import {%s} from '%s';" (Type.getName t) relativePath
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
-        TS.addUsedType ts p.PropertyType
 
         let name = p.Name |> String.toCamelCase
         let typeName = TS.getTypeName ts p.PropertyType

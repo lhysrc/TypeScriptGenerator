@@ -8,3 +8,9 @@ type TypeOption = {
     Type : Type
     Path : string
 }
+
+type TSFile = {
+    FullPath : string
+    Content :string
+    UsedTypes : Type seq
+}

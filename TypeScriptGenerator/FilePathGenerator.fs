@@ -25,7 +25,7 @@ module internal FilePathGenerator =
             |> string
             |> Uri.UnescapeDataString
         rel <- rel.Replace ('\\', '/')
-        if not (rel.Contains ("/")) then
+        if not (rel.StartsWith (".")) then
             "./" + rel
         else
             rel

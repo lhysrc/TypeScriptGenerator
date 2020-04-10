@@ -1,6 +1,7 @@
 namespace TypeScriptGenerator
 open System
 open System.IO
+open System.Collections.Generic
 
 module internal FileGenerator =
 
@@ -12,7 +13,9 @@ module internal FileGenerator =
     //    //|> Seq.append useds
     //    //|> Seq.distinct
 
-    let generateFile (root:string) (allTypes:Type seq) (t:Type) = 
+    let private cache = Dictionary<Type, TSFile>()
+
+    let private generateFile' (root:string) (t:Type) =         
         let o :TypeOption = {
             Type = t
             //UsedTypes = getUsedTypes' allTypes t
@@ -26,8 +29,16 @@ module internal FileGenerator =
         
         let (content, useds) = gFunc o
 
-        {|
+        {
             FullPath = Path.Combine(root, o.Path + ".ts")
             Content = content
             UsedTypes = useds
-        |}
+        }
+
+    let generateFile (root:string) (t:Type) =       
+        match cache.TryGetValue t with
+        | true , v -> v
+        | _ -> 
+            let v = generateFile' root t
+            cache.[t]<-v
+            v

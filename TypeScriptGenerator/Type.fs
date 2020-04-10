@@ -49,17 +49,8 @@ let getMapType (t:Type) = //todo 使用[key:string]:TypeName??
       
 
 let unwrap (t:Type) =
-    if t.IsGenericType then
-        t.GetInterfaces() 
-        |> Array.append [| t |]
-        |> Array.tryFind(fun i-> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<IEnumerable<_>>)
-        |> function 
-               | Some i -> i.GenericTypeArguments.[0]
-               | None -> t
-    else if t.IsArray && t.HasElementType then
-       t.GetElementType()
-    else
-       t
+    let under = Nullable.GetUnderlyingType t 
+    if isNull under then t else under
 
 //let getUsedTypes (allTypes:Type seq) (t:Type)  =
 //    if isStatic t then 

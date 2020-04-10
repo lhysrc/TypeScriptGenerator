@@ -10,7 +10,7 @@ type SystemType = {
 
 let private buildinTypes = [
     {Key = typeof<Void>;Value = "void"}
-    {Key = typeof<obj>;Value = "object"}
+    {Key = typeof<obj>;Value = "any"}
 
     {Key = typeof<String>;Value = "string"}
     {Key = typeof<Char>;Value = "string"}
@@ -58,14 +58,18 @@ let isBuildIn (t:Type) =
     buildinTypes |> List.exists (fun i->i.Key = t)
 
 let addUsedType (ts:Type HashSet) (t:Type) =
-    let t' = unwrap t
-    if isBuildIn t' then ()
+    let t' = (*unwrap*) t
+    if (*isBuildIn t' ||*) t.IsGenericParameter then ()
+    else if t.IsGenericType then ts.Add (t.GetGenericTypeDefinition()) |> ignore
     else ts.Add t' |> ignore
-
 
 
 let (|TSBuildIn|_|) (t:Type) = 
     buildinTypes |> List.tryFind (fun i->i.Key = t)
+
+let (|TSTuple|_|) (t:Type) =
+    if Reflection.FSharpType.IsTuple t then Some t
+    else None
 
 let (|TSMap|_|) (t:Type) = 
     getMapType t
@@ -73,14 +77,17 @@ let (|TSMap|_|) (t:Type) =
 let (|TSArray|_|) (t:Type) = 
     getArrayType t
 
-let rec getTypeName (useds:Type HashSet) (t:Type):string =
-    addUsedType useds t
-    let under = Nullable.GetUnderlyingType t
-    match (if isNull under then t else under) with
+let rec getTypeName (useds:Type HashSet) (t:Type):string =    
+    match (unwrap t) with
     | TSBuildIn t -> t.Value
-    | TSMap (k,v) -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
+    | TSTuple t -> "[]"
+    | TSMap (k,v) -> 
+        match k with
+        | k when k = typeof<string> -> "{ [key:string]: " + (getTypeName useds v) + " }"
+        | _ -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
     | TSArray t -> (getTypeName useds t) + "[]"
-    | _ -> 
+    | t -> 
+        addUsedType useds t
         match t.IsGenericType with
         | true ->   
             let args = 
