@@ -6,7 +6,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module private ContentGenerator =
     let generateExportType (ts:Type HashSet) (t: Type) =
-        let typeString = 
+        let typeString =             
             match t with
             | t when t.IsInterface -> "interface"
             | t when (t.IsAbstract && not t.IsSealed) -> "abstract class"
@@ -14,11 +14,11 @@ module private ContentGenerator =
             | _ ->  "class"
         
         let extendString = 
-            if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then String.Empty
-            else "extends " + TS.getTypeName ts t.BaseType
+            if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then None
+            else Some ("extends " + TS.getTypeName ts t.BaseType)
         
         let implString =
-            if t.IsEnum then String.Empty
+            if t.IsEnum then None
             else 
                 let ifs = t.GetInterfaces()
                 let baseIfs = if isNull t.BaseType then Array.empty<Type> else t.BaseType.GetInterfaces()
@@ -30,19 +30,18 @@ module private ContentGenerator =
 
                 let key = if t.IsClass then "implements " else "extends "
                 if String.IsNullOrEmpty ifsString then 
-                    String.Empty 
+                    None
                 else 
-                    key + ifsString
-                
+                    Some(key + ifsString)                
 
-        String.concat " " [
-            "export"
-            typeString
-            TS.getTypeName ts t
+        [   Some "export"
+            Some typeString
+            Some (TS.getTypeName ts t)
             extendString
             implString
-            "{"
-        ]
+            Some "{"        ] 
+        |> List.choose id
+        |> String.concat " " 
 
 module internal EnumContentGenerator = 
     let generateContent (o: TypeOption) =
@@ -80,18 +79,26 @@ module internal ConstContentGenerator =
 
 module internal ModelContentGenerator =   
 
-    let generateImport (currentPath:string) (t:Type) =
-        let usedPath = FilePathGenerator.generatePath t
-        let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
-        sprintf "import { %s } from '%s';" (Type.getName t) relativePath
+    let generateImports (currentPath:string) (importedTypes:Type seq) =
+        let generateImport (t:Type) =
+            let usedPath = FilePathGenerator.generatePath t
+            let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
+            sprintf "import { %s } from '%s';" (Type.getName t) relativePath
         //todo 同名泛型类型引入？
+        
+        (
+        importedTypes            
+        |> Seq.map generateImport
+        |> String.concat Environment.NewLine
+        )
+        + Environment.NewLine
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
-
         let name = p.Name |> String.toCamelCase
         let typeName = TS.getTypeName ts p.PropertyType
 
         String.concat "" [
+            TS.indent
             name
             "?: "
             typeName
@@ -107,18 +114,15 @@ module internal ModelContentGenerator =
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
             |> Seq.map (generateProp ``usedTypes&Self``)
-            |> String.concat (Environment.NewLine + TS.indent)
+            |> String.concat Environment.NewLine
         
         //printfn "%s" "-------------"
         //printfn "%s" o.Type.Name
-        let usedTypes = ``usedTypes&Self`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
-        let imports = 
-            usedTypes            
-            |> Seq.map (generateImport o.Path)
-            |> String.concat Environment.NewLine
+        let importedTypes = ``usedTypes&Self`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
+
         String.concat Environment.NewLine [
-            imports
-            typeName
-            TS.indent + props
-            "}"
-        ], usedTypes
+            if not importedTypes.IsEmpty then yield generateImports o.Path importedTypes
+            yield typeName
+            yield if String.IsNullOrEmpty props then String.Empty else props
+            yield "}"
+        ], importedTypes

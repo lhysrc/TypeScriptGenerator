@@ -19,7 +19,7 @@ module ModelsGenerator =
             |> List.map (fun t -> generateFile destinationPath t)
         
         files
-        |> List.collect (fun t -> generateUsedTypeFiles destinationPath t.UsedTypes)        
+        |> List.collect (fun t -> generateUsedTypeFiles destinationPath t.ImportedTypes)        
         |> List.append files
 
     [<CompiledName("Generate")>]
@@ -44,7 +44,7 @@ module ModelsGenerator =
 
         let misseds =
             matcheds
-            |> Seq.collect (fun x -> generateUsedTypeFiles destinationPath x.UsedTypes)
+            |> Seq.collect (fun x -> generateUsedTypeFiles destinationPath x.ImportedTypes)
 
         matcheds 
             |> Seq.append misseds
@@ -53,4 +53,4 @@ module ModelsGenerator =
             |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))
         
         sw.Stop()
-        printf "生成文件耗时%f毫秒"  sw.Elapsed.TotalMilliseconds
+        printf "生成文件耗时 %.2f 毫秒"  sw.Elapsed.TotalMilliseconds

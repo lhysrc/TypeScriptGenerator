@@ -18,14 +18,14 @@ module internal FileGenerator =
             | t when (t.IsAbstract && t.IsSealed) -> ConstContentGenerator.generateContent
             | _ ->  ModelContentGenerator.generateContent
         
-        let (content, useds) = gFunc o
+        let (content, imports) = gFunc o
 
         Type.generatedTypes.Add t |> ignore
 
         {
             FullPath = Path.Combine(rootDir, o.Path + ".ts")
             Content = content
-            UsedTypes = useds
+            ImportedTypes = imports
         }
 
     let generateFile (root:string) (t:Type) =       

@@ -4,7 +4,7 @@ open System
 open System.IO
 
 module internal FilePathGenerator =
-    let getDirName (name:string) =
+    let private getDirName (name:string) =
         String.toKebabCase name
 
     let getFileName (t:Type) =        

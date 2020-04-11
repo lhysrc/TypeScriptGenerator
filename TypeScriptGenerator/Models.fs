@@ -12,5 +12,5 @@ type internal TypeOption = {
 type internal TSFile = {
     FullPath : string
     Content :string
-    UsedTypes : Type list
+    ImportedTypes : Type list
 }
