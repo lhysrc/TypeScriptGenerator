@@ -18,15 +18,15 @@ namespace Runner
             var configuration = builder.Build();
             var root = configuration["root"];
 
-            var asmNames = new string[]
+            var asmNames = new string[0]
             {
-                "QiaoDan.Core.dll",
-                "QiaoDan.ViewModels.Abstractions.dll",
-                "QiaoDan.Admin.ViewModels.dll",
-                "QiaoDan.OA.Core.dll",
-                "QiaoDan.OA.ViewModels.dll",
-                "QiaoDan.HR.Core.dll",
-                "QiaoDan.HR.ViewModels.dll",
+                //"QiaoDan.Core.dll",
+                //"QiaoDan.ViewModels.Abstractions.dll",
+                //"QiaoDan.Admin.ViewModels.dll",
+                //"QiaoDan.OA.Core.dll",
+                //"QiaoDan.OA.ViewModels.dll",
+                //"QiaoDan.HR.Core.dll",
+                //"QiaoDan.HR.ViewModels.dll",
             }
             ;
 
@@ -74,14 +74,31 @@ namespace Runner
         public Item X { get; set; }
     }
 
-    public static class Static
+    public static class StaticWithNest
     {
         public const string ConstString = "ConstString";
         public const int ConstInt = 1314520;
         public static void Help() { }
+
+        public static class Nest
+        {
+            public const string ConstString = "ConstString";
+            public const double ConstDouble = 1314.520;
+
+            public static class NestInNest
+            {
+                public const string ConstString = "ConstString";
+                public const double ConstDouble = 1314.520;
+            }
+        }
+    }
+    public static class Static
+    {
+        public const string ConstString = "ConstString";
+        public const int ConstInt = 1314520;
     }
 
-    interface IViewModel: IImportMe2<Item>
+    interface IViewModel: IImportMe3<IImportMe2<BaseItem>,int,string>
     {
 
     }
@@ -92,9 +109,11 @@ namespace Runner.ForImport
     {
         public int Id { get; set; }
     }
-
     public interface IImportMe2<T>
     {
         public T X { get; set; }
+    }
+    public interface IImportMe3<T,T1,T2>
+    {
     }
 }

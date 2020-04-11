@@ -5,7 +5,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module private ContentGenerator =
-    let generateExportType (ts:Type HashSet) (t: Type) =
+    let generateExportType (useds:Type HashSet) (t: Type) =
         let typeString =             
             match t with
             | t when t.IsInterface -> "interface"
@@ -15,7 +15,7 @@ module private ContentGenerator =
         
         let extendString = 
             if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then None
-            else Some ("extends " + TS.getTypeName ts t.BaseType)
+            else Some ("extends " + TS.getTypeName useds t.BaseType)
         
         let implString =
             if t.IsEnum then None
@@ -25,7 +25,7 @@ module private ContentGenerator =
                 let ifsString =
                     ifs
                     |> Seq.except baseIfs
-                    |> Seq.map (TS.getTypeName ts)
+                    |> Seq.map (TS.getTypeName useds)
                     |> String.concat ", "
 
                 let key = if t.IsClass then "implements " else "extends "
@@ -36,7 +36,7 @@ module private ContentGenerator =
 
         [   Some "export"
             Some typeString
-            Some (TS.getTypeName ts t)
+            Some (TS.getTypeName useds t)
             extendString
             implString
             Some "{"        ] 
@@ -67,14 +67,35 @@ module internal ConstContentGenerator =
     let private getConstValue (fi:FieldInfo) =
         sprintf "%A" (fi.GetRawConstantValue())
 
-    //todo 生成内部类
-
-    let generateContent (t: TypeOption) =
-        t.Type.GetFields(BindingFlags.Public ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy)
+    let private generateFields (indent:string) (t:Type) =
+        t.GetFields(BindingFlags.Public ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy)
         |> Seq.filter (fun fi -> fi.IsLiteral && not fi.IsInitOnly)
-        |> Seq.map (fun fi -> sprintf "export const %s = %s;" fi.Name (getConstValue fi))
+        |> Seq.map (fun fi -> sprintf "%sexport const %s = %s;" indent fi.Name (getConstValue fi))
         |> String.concat Environment.NewLine
-        ,List.empty<Type>
+
+    let rec private generateNests (indent:string) (t:Type) =
+        let export = sprintf "%sexport module %s {" indent (Type.getName t)
+        let fields = generateFields (indent + TS.indent) t
+        let nests =
+            t.GetNestedTypes()
+            |> List.ofArray
+            |> List.map (generateNests (indent + TS.indent))
+        String.concat Environment.NewLine [
+            yield String.Empty
+            yield export
+            yield fields
+            yield! nests
+            yield indent + "}"
+        ]
+
+    let generateContent (o: TypeOption) =
+        let t = o.Type
+        let fields = generateFields String.Empty t
+
+        let nests = t.GetNestedTypes() |> Array.map (generateNests String.Empty) |> Array.toList
+
+        String.concat Environment.NewLine (fields :: nests),
+        List.empty<Type>
 
 
 module internal ModelContentGenerator =   

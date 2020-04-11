@@ -98,7 +98,7 @@ let rec getTypeName (useds:Type HashSet) (t:Type):string =
             let args = 
                 t.GetGenericArguments()
                 |> Seq.map (getTypeName useds)
-                |> String.concat ","
+                |> String.concat ", "
             String.concat "" [                    
                 Type.getName t
                 "<"
