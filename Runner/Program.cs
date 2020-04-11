@@ -36,6 +36,10 @@ namespace Runner
                 opt => 
                 { 
                     opt.TypeMatcher = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
+                    opt.CodeSnippets = t => t.IsClass ? @$"
+  static _assemblyName = ""{t.Assembly.GetName().Name}"";
+  static _className = ""{t.FullName}"";
+" : null;
                 }
             );
         }
@@ -53,6 +57,7 @@ namespace Runner
         public int? Nullable { get; set; }
         public GenericItem<string> Generic { get; set; }
         public Dictionary<string, BaseItem> Dictionary { get; set; }
+        public Dictionary<Guid, BaseItem> Dictionary2 { get; set; }
         public DateTime Date { get; set; }
         public string Hello => "Hello World!";
         public byte[] File { get; set; }

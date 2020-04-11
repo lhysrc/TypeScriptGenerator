@@ -7,10 +7,12 @@ module internal FileGenerator =
 
     let private cache = Dictionary<Type, TSFile>()
 
-    let private generateFile' (rootDir:string) (t:Type) =         
+    let private generateFile' (opts:Options) (t:Type) =         
         let o :TypeOption = {
             Type = t
             Path = FilePathGenerator.generatePath t
+            CodeSnippets = if isNull opts.CodeSnippets then None else Some (opts.CodeSnippets.Invoke t) //todo ignore null & empty
+            PropertyConverter = if isNull opts.PropertyConverter then None else Some (FuncConvert.FromFunc opts.PropertyConverter)
         }
         let gFunc =
             match o.Type with
@@ -23,15 +25,15 @@ module internal FileGenerator =
         Type.generatedTypes.Add t |> ignore
 
         {
-            FullPath = Path.Combine(rootDir, o.Path + ".ts")
+            FullPath = Path.Combine(opts.Destination, o.Path + ".ts")
             Content = content
             ImportedTypes = imports
         }
 
-    let generateFile (root:string) (t:Type) =       
+    let generateFile (opts:Options) (t:Type) =       
         match cache.TryGetValue t with
         | true , v -> v
         | _ -> 
-            let v = generateFile' root t
+            let v = generateFile' opts t
             cache.[t]<-v
             v
