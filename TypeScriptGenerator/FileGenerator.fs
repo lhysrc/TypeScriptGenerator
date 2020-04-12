@@ -18,11 +18,12 @@ module internal FileGenerator =
                |> List.ofArray
 
 
-    let private generateFile' (opts:Options) (t:Type) =         
-        let o :TypeOption = {
+    let private generateFile' (opts:ModelGenerateOptions) (t:Type) =         
+        let o :TypeOptions = {
             Type = t
             Path = FilePathGenerator.generatePath t
             CodeSnippets = getCodeSnippets opts.CodeSnippets t
+            PropertyFilter = if isNull opts.PropertyFilter then fun _ -> true else FuncConvert.FromFunc opts.PropertyFilter
             PropertyConverter = if isNull opts.PropertyConverter then None else Some (FuncConvert.FromFunc opts.PropertyConverter)
         }
         let gFunc =
@@ -41,7 +42,7 @@ module internal FileGenerator =
             ImportedTypes = imports
         }
 
-    let generateFile (opts:Options) (t:Type) =       
+    let generateFile (opts:ModelGenerateOptions) (t:Type) =       
         match cache.TryGetValue t with
         | true , v -> v
         | _ -> 

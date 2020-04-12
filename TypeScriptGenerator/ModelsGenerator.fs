@@ -12,7 +12,7 @@ module ModelsGenerator =
         if not file.Directory.Exists then file.Directory.Create();
         File.WriteAllText(path, content)
     
-    let rec private generateUsedTypeFiles (opts:Options) (ts:Type list) = 
+    let rec private generateUsedTypeFiles (opts:ModelGenerateOptions) (ts:Type list) = 
         let files =
             ts 
             |> List.filter (fun t -> not (Type.generatedTypes.Contains t))
@@ -24,10 +24,10 @@ module ModelsGenerator =
 
     [<CompiledName("Generate")>]
     let generate (assemblies : Assembly seq, 
-                  destinationPath:string, 
-                  optionAction:Action<Options>) =
-        let opts = Options(destinationPath)
-        optionAction.Invoke opts
+                  destinationPath: string, 
+                  optionsAction: Action<ModelGenerateOptions>) =
+        let opts = ModelGenerateOptions destinationPath
+        optionsAction.Invoke opts
 
         let sw = System.Diagnostics.Stopwatch()
         sw.Start()
@@ -39,7 +39,7 @@ module ModelsGenerator =
         let matcheds =
             loadedTypes
             |> Seq.filter (fun t -> not t.IsNested)
-            |> Seq.filter (if isNull opts.TypeMatcher then fun _ -> true else FuncConvert.FromFunc opts.TypeMatcher)    
+            |> Seq.filter (if isNull opts.TypeFilter then fun _ -> true else FuncConvert.FromFunc opts.TypeFilter)    
             |> Seq.map (generateFile opts)
 
         let misseds =

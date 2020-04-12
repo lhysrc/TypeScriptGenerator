@@ -35,7 +35,8 @@ namespace Runner
                 "../ts.g",
                 opt => 
                 { 
-                    opt.TypeMatcher = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
+                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
+                    opt.PropertyFilter = p => p.Name != "IgnoreMe";
                     opt.CodeSnippets = t => t.IsClass ? @$"
                       static _assemblyName = ""{t.Assembly.GetName().Name}"";
                       static _className = ""{t.FullName}"";" : null;

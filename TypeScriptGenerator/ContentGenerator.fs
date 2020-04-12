@@ -44,7 +44,7 @@ module private ContentGenerator =
         |> String.concat " " 
 
 module internal EnumContentGenerator = 
-    let generateContent (o: TypeOption) =
+    let generateContent (o: TypeOptions) =
         let usedTypes = Type.getUsedTypes o.Type        
         let t = o.Type
         let typeName = generateExportType usedTypes t
@@ -88,7 +88,7 @@ module internal ConstContentGenerator =
             yield indent + "}"
         ]
 
-    let generateContent (o: TypeOption) =
+    let generateContent (o: TypeOptions) =
         let t = o.Type
         let fields = generateFields String.Empty t
 
@@ -125,8 +125,8 @@ module internal ModelContentGenerator =
             typeName
             ";"
         ]
-
-    let generateContent (o: TypeOption) =
+         
+    let generateContent (o: TypeOptions) =
         let ``usedTypes&Self`` = Type.getUsedTypes o.Type        
 
         let t = o.Type
@@ -134,6 +134,7 @@ module internal ModelContentGenerator =
         let props = 
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
+            |> Seq.filter o.PropertyFilter
             |> Seq.map (generateProp ``usedTypes&Self``)
             |> String.concat Environment.NewLine
         
