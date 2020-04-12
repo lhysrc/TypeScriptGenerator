@@ -145,6 +145,6 @@ module internal ModelContentGenerator =
             if not importedTypes.IsEmpty then yield generateImports o.Path importedTypes
             yield typeName
             yield if String.IsNullOrEmpty props then String.Empty else props
-            if Option.isSome o.CodeSnippets then yield Option.get o.CodeSnippets
+            yield! o.CodeSnippets
             yield "}"
         ], importedTypes

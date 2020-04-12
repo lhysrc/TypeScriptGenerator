@@ -12,7 +12,7 @@ type internal TypeOption = {
     Type : Type
     Path : string
     PropertyConverter: (PropertyInfo -> string) option
-    CodeSnippets: string option
+    CodeSnippets: string list
 }
 
 type internal TSFile = {

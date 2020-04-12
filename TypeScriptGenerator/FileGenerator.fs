@@ -7,11 +7,22 @@ module internal FileGenerator =
 
     let private cache = Dictionary<Type, TSFile>()
 
+    let private getCodeSnippets (x: Func<Type, string>) (t:Type) =
+        if isNull x then List.empty
+        else
+           let snippets = x.Invoke t
+           if isNull snippets then List.empty
+           else
+               snippets.Split([|'\r';'\n'|],StringSplitOptions.RemoveEmptyEntries)
+               |> Array.map (fun line -> TS.indent + line.Trim())
+               |> List.ofArray
+
+
     let private generateFile' (opts:Options) (t:Type) =         
         let o :TypeOption = {
             Type = t
             Path = FilePathGenerator.generatePath t
-            CodeSnippets = if isNull opts.CodeSnippets then None else Some (opts.CodeSnippets.Invoke t) //todo ignore null & empty
+            CodeSnippets = getCodeSnippets opts.CodeSnippets t
             PropertyConverter = if isNull opts.PropertyConverter then None else Some (FuncConvert.FromFunc opts.PropertyConverter)
         }
         let gFunc =
