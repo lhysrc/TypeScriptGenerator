@@ -10,7 +10,8 @@ module ModelsGenerator =
         // printfn "%s" path
         let file = FileInfo(path)
         if not file.Directory.Exists then file.Directory.Create();
-        File.WriteAllText(path, content)
+        if File.Exists path && File.ReadAllText path = content then ()
+        else File.WriteAllText(path, content)
     
     let rec private generateUsedTypeFiles (opts:ModelGenerateOptions) (ts:Type list) = 
         let files =
