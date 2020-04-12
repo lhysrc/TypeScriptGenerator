@@ -13,7 +13,7 @@ type internal TypeOptions = {
     Type : Type
     Path : string
     PropertyFilter: PropertyInfo -> bool
-    PropertyConverter: (PropertyInfo -> string) option
+    PropertyConverter: (PropertyInfo -> string) option //todo
     CodeSnippets: string list
 }
 

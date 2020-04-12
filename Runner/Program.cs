@@ -18,26 +18,26 @@ namespace Runner
             var configuration = builder.Build();
             var root = configuration["root"];
 
-            var asmNames = new string[0]
+            var asmNames = new string[]
             {
-                //"QiaoDan.Core.dll",
-                //"QiaoDan.ViewModels.Abstractions.dll",
-                //"QiaoDan.Admin.ViewModels.dll",
-                //"QiaoDan.OA.Core.dll",
-                //"QiaoDan.OA.ViewModels.dll",
-                //"QiaoDan.HR.Core.dll",
-                //"QiaoDan.HR.ViewModels.dll",
+                "QiaoDan.Core.dll",
+                "QiaoDan.ViewModels.Abstractions.dll",
+                "QiaoDan.Admin.ViewModels.dll",
+                "QiaoDan.OA.Core.dll",
+                "QiaoDan.OA.ViewModels.dll",
+                "QiaoDan.HR.Core.dll",
+                "QiaoDan.HR.ViewModels.dll",
             }
             ;
 
             ModelsGenerator.Generate(
                 asmNames.Select(n => Assembly.LoadFrom(Path.Combine(root, n))).Append(typeof(Program).Assembly),
                 "../ts.g",
-                opt => 
-                { 
+                opt =>
+                {
                     opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
-                    opt.PropertyFilter = p => p.Name != "IgnoreMe";
-                    opt.CodeSnippets = t => t.IsClass ? @$"
+                    opt.PropertyFilter = p => p.Name != "IgnoreMe" && !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
+                    opt.CodeSnippets = t => t.GetCustomAttributes().Any(a => a.GetType().Name == "DynamicValidateAttribute") ? @$"
                       static _assemblyName = ""{t.Assembly.GetName().Name}"";
                       static _className = ""{t.FullName}"";" : null;
                 }
@@ -53,7 +53,7 @@ namespace Runner
         public IEnumerable<string> Collection { get; set; }
         public double[] Array { get; set; }
         public (int, string) ValueTuple { get; set; }
-        public Tuple<int,string> Tuple { get; set; }
+        public Tuple<int, string> Tuple { get; set; }
         public int? Nullable { get; set; }
         public GenericItem<string> Generic { get; set; }
         public Dictionary<string, BaseItem> Dictionary { get; set; }
@@ -103,7 +103,7 @@ namespace Runner
         public const int ConstInt = 1314520;
     }
 
-    interface IViewModel: IImportMe3<IImportMe2<BaseItem>,int,string>
+    interface IViewModel : IImportMe3<IImportMe2<BaseItem>, int, string>
     {
 
     }
@@ -118,7 +118,7 @@ namespace Runner.ForImport
     {
         public T X { get; set; }
     }
-    public interface IImportMe3<T,T1,T2>
+    public interface IImportMe3<T, T1, T2>
     {
     }
 }
