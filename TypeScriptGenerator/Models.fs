@@ -10,6 +10,7 @@ type ModelGenerateOptions (dest: string) =
     member val PropertyFilter: Func<PropertyInfo, bool> = null with get, set
     member val PropertyConverter: Func<PropertyInfo, string> = null with get, set
     member val TypeConverter: Func<Type, string> = null with get, set
+    member val TypeNameConverter: Func<Type, string> = null with get, set
 
 type internal TypeOptions = {
     Type : Type

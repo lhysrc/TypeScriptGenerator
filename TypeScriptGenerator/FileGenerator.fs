@@ -17,13 +17,6 @@ module internal FileGenerator =
                |> Array.map (fun line -> TS.indent + line.Trim())
                |> List.ofArray
 
-    let private getConverter (x: Func<'a,string>) (t:'a) =
-        if isNull x then None
-        else
-           match x.Invoke t with
-           | null -> None
-           | result -> Some result
-
     let private generateFile' (opts:ModelGenerateOptions) (t:Type) =         
         let o :TypeOptions = {
             Type = t

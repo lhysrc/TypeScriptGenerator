@@ -50,7 +50,8 @@ namespace Runner
                             return null;
                     };
                     opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
-                    opt.TypeConverter = t => t == typeof(Item) ? "ItemConverted" : null;
+                    opt.TypeConverter = t => t == typeof(Guid) ? "number[]" : null;
+                    opt.TypeNameConverter = t => t == typeof(Item) ? "ConvertedItem" : null;
                 }
             );
         }

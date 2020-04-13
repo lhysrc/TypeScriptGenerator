@@ -29,7 +29,7 @@ module ModelsGenerator =
                   optionsAction: Action<ModelGenerateOptions>) =
         let opts = ModelGenerateOptions destinationPath
         optionsAction.Invoke opts
-        Config.setConfig opts
+        Configuration.setConfig opts
         let sw = System.Diagnostics.Stopwatch()
         sw.Start()
 

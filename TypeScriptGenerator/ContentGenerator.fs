@@ -15,7 +15,7 @@ module private ContentGenerator =
         
         let extendString = 
             if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then None
-            else Some ("extends " + TS.getTypeName imports t.BaseType)
+            else Some ("extends " + TS.getName imports t.BaseType)
         
         let implString =
             if t.IsEnum then None
@@ -25,7 +25,7 @@ module private ContentGenerator =
                 let ifsString =
                     ifs
                     |> Seq.except baseIfs
-                    |> Seq.map (TS.getTypeName imports)
+                    |> Seq.map (TS.getName imports)
                     |> String.concat ", "
 
                 let key = if t.IsClass then "implements " else "extends "
@@ -36,7 +36,7 @@ module private ContentGenerator =
 
         [   Some "export"
             Some typeString
-            Some (TS.getTypeName imports t)
+            Some (TS.getName imports t)
             extendString
             implString
             Some "{"        ] 
@@ -119,10 +119,10 @@ module internal ModelContentGenerator =
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
         let name =
-            match Config.propertyConverter p with
+            match Configuration.converteProperty p with
             | Some n -> n
             | None   -> p.Name |> String.toCamelCase
-        let typeName = TS.getTypeName ts p.PropertyType
+        let typeName = TS.getName ts p.PropertyType
 
         String.concat "" [
             TS.indent
@@ -140,7 +140,7 @@ module internal ModelContentGenerator =
         let props = 
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
-            |> Seq.filter Config.propertyFilter
+            |> Seq.filter Configuration.filterProperty
             |> Seq.map (generateProp ``importedTypes&this``)
             |> String.concat Environment.NewLine
         

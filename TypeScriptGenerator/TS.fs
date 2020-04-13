@@ -65,7 +65,12 @@ let addImportType (ts:Type HashSet) (t:Type) =
 
 
 let (|TSBuildIn|_|) (t:Type) = 
-    buildinTypes |> List.tryFind (fun i->i.Key = t)
+    match Configuration.converteType t with
+    | Some n -> Some n // tsBuildIns |> List.tryFind (fun i-> n = i)
+    | None   -> 
+    match buildinTypes |> List.tryFind (fun i->i.Key = t) with
+    | Some st -> Some st.Value
+    | None    -> None
 
 let (|TSTuple|_|) (t:Type) =
     if Reflection.FSharpType.IsTuple t then Some (Reflection.FSharpType.GetTupleElements t)
@@ -78,31 +83,31 @@ let (|TSArray|_|) (t:Type) =
     getArrayType t
 
 let getNameWithoutGeneric (t:Type) =
-    match Config.typeConverter t with
+    match Configuration.converteTypeName t with
     | Some n -> n
     | None -> Type.getNameWithoutGeneric t
 
-let rec getTypeName (imports:Type HashSet) (t:Type):string =    
+let rec getName (imports:Type HashSet) (t:Type):string =    
     match (unwrap t) with
-    | TSBuildIn t -> t.Value
+    | TSBuildIn n -> n
     | TSTuple ts -> 
         "[" + (
             ts 
-            |> Array.map (getTypeName imports)
+            |> Array.map (getName imports)
             |> String.concat ", "
         ) + "]"
     | TSMap (k,v) -> 
         match k with
-        | k when k = typeof<string> -> "{ [key: string]: " + (getTypeName imports v) + " }"
-        | _ -> sprintf "Map<%s,%s>" (getTypeName imports k)(getTypeName imports v)
-    | TSArray t -> (getTypeName imports t) + "[]"
+        | k when k = typeof<string> -> "{ [key: string]: " + (getName imports v) + " }"
+        | _ -> sprintf "Map<%s,%s>" (getName imports k)(getName imports v)
+    | TSArray t -> (getName imports t) + "[]"
     | t -> 
         addImportType imports t
         match t.IsGenericType with
         | true ->   
             let args = 
                 t.GetGenericArguments()
-                |> Seq.map (getTypeName imports)
+                |> Seq.map (getName imports)
                 |> String.concat ", "
             String.concat "" [                    
                 getNameWithoutGeneric t
