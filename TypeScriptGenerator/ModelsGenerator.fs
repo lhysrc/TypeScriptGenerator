@@ -37,7 +37,7 @@ module ModelsGenerator =
             assemblies 
             |> Seq.collect (fun a -> a.ExportedTypes)
 
-        let matcheds =
+        let exports =
             loadedTypes
             |> Seq.filter (fun t -> not t.IsNested)
             |> Seq.filter (if isNull opts.TypeFilter then fun _ -> true else FuncConvert.FromFunc opts.TypeFilter)    
@@ -45,17 +45,17 @@ module ModelsGenerator =
             |> Seq.filter (fun f -> not <| String.IsNullOrWhiteSpace f.Content)
             |> Seq.cache
 
-        let misseds =
-            matcheds
+        let imports =
+            exports
             |> Seq.collect (fun x -> generateUsedTypeFiles opts x.ImportedTypes)
             |> Seq.filter (fun f -> not <| String.IsNullOrWhiteSpace f.Content)
 
-        matcheds 
-        |> Seq.append misseds
+        exports 
+        |> Seq.append imports
         |> Seq.distinctBy (fun t->t.FullPath)
         |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))
         
-        matcheds 
+        exports 
         |> Seq.groupBy (fun m -> Path.GetDirectoryName m.FullPath)
         |> Seq.iter (fun (dir,files) -> 
             files 
