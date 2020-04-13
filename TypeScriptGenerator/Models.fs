@@ -20,6 +20,7 @@ type internal TypeOptions = {
 }
 
 type internal TSFile = {
+    Type : Type
     FullPath : string
     Content :string
     ImportedTypes : Type list

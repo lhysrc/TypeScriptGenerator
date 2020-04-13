@@ -95,8 +95,10 @@ module internal ConstContentGenerator =
 
         let nests = t.GetNestedTypes() |> Array.map (generateNests String.Empty) |> Array.toList
 
-        String.concat Environment.NewLine (fields :: nests @ o.CodeSnippets),
-        List.empty<Type>
+        let content =
+            if String.IsNullOrEmpty fields && List.isEmpty nests then String.Empty
+            else String.concat Environment.NewLine (fields :: nests @ o.CodeSnippets)
+        content, List.empty<Type>
 
 
 module internal ModelContentGenerator =   

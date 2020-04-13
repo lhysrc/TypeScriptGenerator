@@ -44,6 +44,7 @@ module internal FileGenerator =
         Type.generatedTypes.Add t |> ignore
 
         {
+            Type = t
             FullPath = Path.Combine(opts.Destination, o.Path + ".ts")
             Content = content
             ImportedTypes = imports

@@ -42,16 +42,29 @@ module ModelsGenerator =
             |> Seq.filter (fun t -> not t.IsNested)
             |> Seq.filter (if isNull opts.TypeFilter then fun _ -> true else FuncConvert.FromFunc opts.TypeFilter)    
             |> Seq.map (generateFile opts)
+            |> Seq.filter (fun f -> not <| String.IsNullOrWhiteSpace f.Content)
+            |> Seq.cache
 
         let misseds =
             matcheds
             |> Seq.collect (fun x -> generateUsedTypeFiles opts x.ImportedTypes)
+            |> Seq.filter (fun f -> not <| String.IsNullOrWhiteSpace f.Content)
 
         matcheds 
-            |> Seq.append misseds
-            |> Seq.filter (fun f -> String.IsNullOrWhiteSpace f.Content |> not)
-            |> Seq.distinctBy (fun t->t.FullPath)
-            |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))
+        |> Seq.append misseds
+        |> Seq.distinctBy (fun t->t.FullPath)
+        |> Seq.iter (fun f -> (writeFile f.FullPath f.Content))
         
+        matcheds 
+        |> Seq.groupBy (fun m -> Path.GetDirectoryName m.FullPath)
+        |> Seq.iter (fun (dir,files) -> 
+            files 
+            |> Seq.map (fun f -> 
+                sprintf "export *%s from \"./%s\";" 
+                    (if Type.isStatic f.Type then " as " + Type.getName(f.Type) else String.Empty)
+                    (Path.GetFileNameWithoutExtension f.FullPath)   )
+            |> String.concat Environment.NewLine
+            |> writeFile (Path.Combine(dir, "index.ts"))                )
+
         sw.Stop()
         printf "生成文件耗时 %.2f 毫秒"  sw.Elapsed.TotalMilliseconds
