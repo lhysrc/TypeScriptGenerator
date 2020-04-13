@@ -5,7 +5,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module private ContentGenerator =
-    let generateExportType (useds:Type HashSet) (t: Type) =
+    let generateExportType (imports:Type HashSet) (t: Type) =
         let typeString =             
             match t with
             | t when t.IsInterface -> "interface"
@@ -15,7 +15,7 @@ module private ContentGenerator =
         
         let extendString = 
             if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then None
-            else Some ("extends " + TS.getTypeName useds t.BaseType)
+            else Some ("extends " + TS.getTypeName imports t.BaseType)
         
         let implString =
             if t.IsEnum then None
@@ -25,7 +25,7 @@ module private ContentGenerator =
                 let ifsString =
                     ifs
                     |> Seq.except baseIfs
-                    |> Seq.map (TS.getTypeName useds)
+                    |> Seq.map (TS.getTypeName imports)
                     |> String.concat ", "
 
                 let key = if t.IsClass then "implements " else "extends "
@@ -36,7 +36,7 @@ module private ContentGenerator =
 
         [   Some "export"
             Some typeString
-            Some (TS.getTypeName useds t)
+            Some (TS.getTypeName imports t)
             extendString
             implString
             Some "{"        ] 
@@ -45,9 +45,9 @@ module private ContentGenerator =
 
 module internal EnumContentGenerator = 
     let generateContent (o: TypeOptions) =
-        let usedTypes = Type.getUsedTypes o.Type        
+        let imports = Type.getImportTypes o.Type        
         let t = o.Type
-        let typeName = generateExportType usedTypes t
+        let typeName = generateExportType imports t
 
         let fields = 
             Enum.GetValues(t) 
@@ -105,8 +105,8 @@ module internal ModelContentGenerator =
 
     let generateImports (currentPath:string) (importedTypes:Type seq) =
         let generateImport (t:Type) =
-            let usedPath = FilePathGenerator.generatePath t
-            let relativePath = FilePathGenerator.getRelativePath currentPath usedPath 
+            let importPath = FilePathGenerator.generatePath t
+            let relativePath = FilePathGenerator.getRelativePath currentPath importPath 
             sprintf "import { %s } from '%s';" (Type.getName t) relativePath
         //todo 同名泛型类型引入？
         
@@ -130,20 +130,20 @@ module internal ModelContentGenerator =
         ]
          
     let generateContent (o: TypeOptions) =
-        let ``usedTypes&Self`` = Type.getUsedTypes o.Type        
+        let ``importedTypes&this`` = Type.getImportTypes o.Type        
 
         let t = o.Type
-        let typeName = generateExportType ``usedTypes&Self`` t
+        let typeName = generateExportType ``importedTypes&this`` t
         let props = 
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
             |> Seq.filter o.PropertyFilter
-            |> Seq.map (generateProp ``usedTypes&Self``)
+            |> Seq.map (generateProp ``importedTypes&this``)
             |> String.concat Environment.NewLine
         
         //printfn "%s" "-------------"
         //printfn "%s" o.Type.Name
-        let importedTypes = ``usedTypes&Self`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
+        let importedTypes = ``importedTypes&this`` |> Seq.filter (fun u -> u <> t) |> Seq.toList
 
         String.concat Environment.NewLine [
             if not importedTypes.IsEmpty then yield generateImports o.Path importedTypes

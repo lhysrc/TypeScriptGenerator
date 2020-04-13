@@ -13,14 +13,14 @@ module ModelsGenerator =
         if File.Exists path && File.ReadAllText path = content then ()
         else File.WriteAllText(path, content)
     
-    let rec private generateUsedTypeFiles (opts:ModelGenerateOptions) (ts:Type list) = 
+    let rec private generateImportedTypeFiles (opts:ModelGenerateOptions) (ts:Type list) = 
         let files =
             ts 
             |> List.filter (fun t -> not (Type.generatedTypes.Contains t))
             |> List.map (fun t -> generateFile opts t)
         
         files
-        |> List.collect (fun t -> generateUsedTypeFiles opts t.ImportedTypes)        
+        |> List.collect (fun t -> generateImportedTypeFiles opts t.ImportedTypes)        
         |> List.append files
 
     [<CompiledName("Generate")>]
@@ -47,7 +47,7 @@ module ModelsGenerator =
 
         let imports =
             exports
-            |> Seq.collect (fun x -> generateUsedTypeFiles opts x.ImportedTypes)
+            |> Seq.collect (fun x -> generateImportedTypeFiles opts x.ImportedTypes)
             |> Seq.filter (fun f -> not <| String.IsNullOrWhiteSpace f.Content)
 
         exports 

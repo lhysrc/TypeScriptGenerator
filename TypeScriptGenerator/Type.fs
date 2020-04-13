@@ -3,14 +3,14 @@ open System
 open System.Collections.Generic
 
 let internal generatedTypes = HashSet<Type>()
-let internal usedTypes = Dictionary<Type,HashSet<Type>>()
+let internal importedTypes = Dictionary<Type,HashSet<Type>>()
 
-let getUsedTypes (t:Type) =
-    match usedTypes.TryGetValue t with
+let getImportTypes (t:Type) =
+    match importedTypes.TryGetValue t with
     | true,v -> v
     | false,_ ->
         let v = HashSet<Type>()
-        usedTypes.[t] <- v
+        importedTypes.[t] <- v
         v
 
 let isStatic (t:Type) =

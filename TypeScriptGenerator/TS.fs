@@ -57,7 +57,7 @@ let private buildinTypes = [
 let isBuildIn (t:Type) =
     buildinTypes |> List.exists (fun i->i.Key = t)
 
-let addUsedType (ts:Type HashSet) (t:Type) =
+let addImportType (ts:Type HashSet) (t:Type) =
     let t' = (*unwrap*) t
     if (*isBuildIn t' ||*) t.IsGenericParameter then ()
     else if t.IsGenericType then ts.Add (t.GetGenericTypeDefinition()) |> ignore
@@ -77,27 +77,27 @@ let (|TSMap|_|) (t:Type) =
 let (|TSArray|_|) (t:Type) = 
     getArrayType t
 
-let rec getTypeName (useds:Type HashSet) (t:Type):string =    
+let rec getTypeName (imports:Type HashSet) (t:Type):string =    
     match (unwrap t) with
     | TSBuildIn t -> t.Value
     | TSTuple ts -> 
         "[" + (
             ts 
-            |> Array.map (getTypeName useds)
+            |> Array.map (getTypeName imports)
             |> String.concat ", "
         ) + "]"
     | TSMap (k,v) -> 
         match k with
-        | k when k = typeof<string> -> "{ [key: string]: " + (getTypeName useds v) + " }"
-        | _ -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
-    | TSArray t -> (getTypeName useds t) + "[]"
+        | k when k = typeof<string> -> "{ [key: string]: " + (getTypeName imports v) + " }"
+        | _ -> sprintf "Map<%s,%s>" (getTypeName imports k)(getTypeName imports v)
+    | TSArray t -> (getTypeName imports t) + "[]"
     | t -> 
-        addUsedType useds t
+        addImportType imports t
         match t.IsGenericType with
         | true ->   
             let args = 
                 t.GetGenericArguments()
-                |> Seq.map (getTypeName useds)
+                |> Seq.map (getTypeName imports)
                 |> String.concat ", "
             String.concat "" [                    
                 Type.getName t
@@ -106,35 +106,3 @@ let rec getTypeName (useds:Type HashSet) (t:Type):string =
                 ">"
             ]
         | false -> Type.getName t
-
-(*
-let rec getTypeName (useds:Type HashSet) (t:Type):string =
-    addUsedType useds t
-    let tsType = buildinTypes |> List.tryFind (fun st -> st.Key = t)
-    match tsType with
-    | Some t -> t.Value
-    | None -> 
-        match getMapType t with
-        | Some (k,v) -> sprintf "Map<%s,%s>" (getTypeName useds k)(getTypeName useds v)
-        | None ->
-            match getArrayType t with
-            | Some t -> (getTypeName useds t) + "[]"
-            | None -> 
-                match t.IsGenericType with
-                | true ->    
-                    if t.GetGenericTypeDefinition() = typedefof<Nullable<_>> then 
-                        Type.getName (t.GetGenericArguments().[0])
-                    else
-                        let args = 
-                            t.GetGenericArguments()
-                            |> Seq.map (getTypeName useds)
-                            |> String.concat ","
-                        String.concat "" [                    
-                            Type.getName t
-                            "<"
-                            args
-                            ">"
-                        ]
-                | false -> Type.getName t
-                
-*)
