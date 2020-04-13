@@ -77,10 +77,10 @@ let (|TSTuple|_|) (t:Type) =
     else None
 
 let (|TSMap|_|) (t:Type) = 
-    getMapType t
+    getDictionaryTypes t
     
 let (|TSArray|_|) (t:Type) = 
-    getArrayType t
+    getCollectionType t
 
 let getNameWithoutGeneric (t:Type) =
     match Configuration.converteTypeName t with

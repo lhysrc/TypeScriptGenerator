@@ -19,7 +19,7 @@ let getNameWithoutGeneric (t:Type) =
    
     t |> getName |> trimGeneric
      
-let getArrayType (t:Type)=
+let getCollectionType (t:Type)=
     if t.IsGenericType then
         t.GetInterfaces() 
         |> Array.append [| t |]
@@ -32,7 +32,7 @@ let getArrayType (t:Type)=
     else
         None
 
-let getMapType (t:Type) =
+let getDictionaryTypes (t:Type) =
     if t.IsGenericType then
         t.GetInterfaces() 
         |> Array.append [| t |]
