@@ -49,6 +49,8 @@ namespace Runner
                         else
                             return null;
                     };
+                    opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
+                    opt.TypeConverter = t => t == typeof(Item) ? "ItemConverted" : null;
                 }
             );
         }
@@ -72,6 +74,7 @@ namespace Runner
         public byte[] File { get; set; }
 
         public string IgnoreMe { get; set; }
+        [PropertyName("hasBeenRename")]
         public string RenameMe { get; set; }
     }
 
@@ -115,6 +118,17 @@ namespace Runner
     interface IViewModel : IImportMe3<IImportMe2<BaseItem>, int, string>
     {
 
+    }
+
+    [System.AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    sealed class PropertyNameAttribute : Attribute
+    {
+        public PropertyNameAttribute(string name)
+        {
+            Name = name;
+        }
+       
+        public string Name { get; }
     }
 }
 namespace Runner.ForImport

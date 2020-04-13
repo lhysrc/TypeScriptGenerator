@@ -45,7 +45,7 @@ module private ContentGenerator =
 
 module internal EnumContentGenerator = 
     let generateContent (o: TypeOptions) =
-        let imports = Type.getImportTypes o.Type        
+        let imports = Cache.getImportTypes o.Type        
         let t = o.Type
         let typeName = generateExportType imports t
 
@@ -75,7 +75,7 @@ module internal ConstContentGenerator =
         |> String.concat Environment.NewLine
 
     let rec private generateNests (indent:string) (t:Type) =
-        let export = sprintf "%sexport module %s {" indent (Type.getName t)
+        let export = sprintf "%sexport module %s {" indent (TS.getNameWithoutGeneric t)
         let fields = generateFields (indent + TS.indent) t
         let nests =
             t.GetNestedTypes()
@@ -107,7 +107,7 @@ module internal ModelContentGenerator =
         let generateImport (t:Type) =
             let importPath = FilePathGenerator.generatePath t
             let relativePath = FilePathGenerator.getRelativePath currentPath importPath 
-            sprintf "import { %s } from '%s';" (Type.getName t) relativePath
+            sprintf "import { %s } from '%s';" (TS.getNameWithoutGeneric t) relativePath
         //todo 同名泛型类型引入？
         
         (
@@ -118,7 +118,10 @@ module internal ModelContentGenerator =
         + Environment.NewLine
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
-        let name = p.Name |> String.toCamelCase
+        let name =
+            match Config.propertyConverter p with
+            | Some n -> n
+            | None   -> p.Name |> String.toCamelCase
         let typeName = TS.getTypeName ts p.PropertyType
 
         String.concat "" [
@@ -130,14 +133,14 @@ module internal ModelContentGenerator =
         ]
          
     let generateContent (o: TypeOptions) =
-        let ``importedTypes&this`` = Type.getImportTypes o.Type        
+        let ``importedTypes&this`` = Cache.getImportTypes o.Type        
 
         let t = o.Type
         let typeName = generateExportType ``importedTypes&this`` t
         let props = 
             t.GetProperties()
             |> Seq.filter (fun p -> p.DeclaringType = t)
-            |> Seq.filter o.PropertyFilter
+            |> Seq.filter Config.propertyFilter
             |> Seq.map (generateProp ``importedTypes&this``)
             |> String.concat Environment.NewLine
         

@@ -16,7 +16,7 @@ module ModelsGenerator =
     let rec private generateImportedTypeFiles (opts:ModelGenerateOptions) (ts:Type list) = 
         let files =
             ts 
-            |> List.filter (fun t -> not (Type.generatedTypes.Contains t))
+            |> List.filter (fun t -> not (Cache.generatedTypes.Contains t))
             |> List.map (fun t -> generateFile opts t)
         
         files
@@ -29,7 +29,7 @@ module ModelsGenerator =
                   optionsAction: Action<ModelGenerateOptions>) =
         let opts = ModelGenerateOptions destinationPath
         optionsAction.Invoke opts
-
+        Config.setConfig opts
         let sw = System.Diagnostics.Stopwatch()
         sw.Start()
 
@@ -61,7 +61,7 @@ module ModelsGenerator =
             files 
             |> Seq.map (fun f -> 
                 sprintf "export *%s from \"./%s\";" 
-                    (if Type.isStatic f.Type then " as " + Type.getName(f.Type) else String.Empty)
+                    (if Type.isStatic f.Type then " as " + TS.getNameWithoutGeneric(f.Type) else String.Empty)
                     (Path.GetFileNameWithoutExtension f.FullPath)   )
             |> String.concat Environment.NewLine
             |> writeFile (Path.Combine(dir, "index.ts"))                )

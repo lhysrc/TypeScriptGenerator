@@ -11,8 +11,10 @@
   <ItemGroup>
     <Compile Include="String.fs" />
     <Compile Include="Type.fs" />
-    <Compile Include="TS.fs" />
     <Compile Include="Models.fs" />
+    <Compile Include="Cache.fs" />
+    <Compile Include="Config.fs" />
+    <Compile Include="TS.fs" />
     <Compile Include="FilePathGenerator.fs" />
     <Compile Include="ContentGenerator.fs" />
     <Compile Include="FileGenerator.fs" />

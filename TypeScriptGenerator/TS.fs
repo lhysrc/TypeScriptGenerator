@@ -77,6 +77,11 @@ let (|TSMap|_|) (t:Type) =
 let (|TSArray|_|) (t:Type) = 
     getArrayType t
 
+let getNameWithoutGeneric (t:Type) =
+    match Config.typeConverter t with
+    | Some n -> n
+    | None -> Type.getNameWithoutGeneric t
+
 let rec getTypeName (imports:Type HashSet) (t:Type):string =    
     match (unwrap t) with
     | TSBuildIn t -> t.Value
@@ -100,9 +105,9 @@ let rec getTypeName (imports:Type HashSet) (t:Type):string =
                 |> Seq.map (getTypeName imports)
                 |> String.concat ", "
             String.concat "" [                    
-                Type.getName t
+                getNameWithoutGeneric t
                 "<"
                 args
                 ">"
             ]
-        | false -> Type.getName t
+        | false -> getNameWithoutGeneric t

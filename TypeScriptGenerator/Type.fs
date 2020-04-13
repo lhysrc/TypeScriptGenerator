@@ -2,33 +2,22 @@
 open System
 open System.Collections.Generic
 
-let internal generatedTypes = HashSet<Type>()
-let internal importedTypes = Dictionary<Type,HashSet<Type>>()
-
-let getImportTypes (t:Type) =
-    match importedTypes.TryGetValue t with
-    | true,v -> v
-    | false,_ ->
-        let v = HashSet<Type>()
-        importedTypes.[t] <- v
-        v
-
 let isStatic (t:Type) =
     t.IsAbstract && t.IsSealed
 
 /// 名字+泛型参数个数
-let getName'n (t:Type) =
+let getName (t:Type) =
     if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
     then t.Name.Substring(1)
     else 
         t.Name
 
-let getName (t:Type) =    
+let getNameWithoutGeneric (t:Type) =    
     let trimGeneric (name:string) = 
         let num = name.IndexOf('`');
         if num > -1 then name.Substring(0, num) else name
    
-    t |> getName'n |> trimGeneric
+    t |> getName |> trimGeneric
      
 let getArrayType (t:Type)=
     if t.IsGenericType then
