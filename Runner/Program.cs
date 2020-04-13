@@ -51,7 +51,7 @@ namespace Runner
                     };
                     opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
                     opt.TypeConverter = t => t == typeof(Guid) ? "number[]" : null;
-                    opt.TypeNameConverter = t => t == typeof(Item) ? "ConvertedItem" : null;
+                    opt.TypeNameConverter = t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IImportMe<>) ? "ImportMeInterface" : null;
                 }
             );
         }
@@ -79,16 +79,16 @@ namespace Runner
         public string RenameMe { get; set; }
     }
 
-    public class GenericItem<TStuff> : IImportMe2<Item>
+    public class GenericItem<TStuff> : IImportMe<Item>
     {
         public TStuff Stuff { get; set; }
         public GenericItem<TStuff> Circle { get; set; }
         public Item X { get; set; }
     }
 
-    public class BaseItem : IImportMe2<Item>
+    public class BaseItem : IImportMe<Item>
     {
-        public ImportMe1 Imported { get; set; }
+        public ImportMe Imported { get; set; }
         public Item X { get; set; }
     }
 
@@ -116,7 +116,7 @@ namespace Runner
         public const int ConstInt = 1314520;
     }
 
-    interface IViewModel : IImportMe3<IImportMe2<BaseItem>, int, string>
+    interface IViewModel : IImportMe3<IImportMe<BaseItem>, int, string>
     {
 
     }
@@ -134,11 +134,11 @@ namespace Runner
 }
 namespace Runner.ForImport
 {
-    public class ImportMe1
+    public class ImportMe
     {
         public int Id { get; set; }
     }
-    public interface IImportMe2<T>
+    public interface IImportMe<T>
     {
         public T X { get; set; }
     }

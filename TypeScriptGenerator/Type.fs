@@ -5,7 +5,6 @@ open System.Collections.Generic
 let isStatic (t:Type) =
     t.IsAbstract && t.IsSealed
 
-/// 名字+泛型参数个数
 let getName (t:Type) =
     if t.IsInterface && t.Name.StartsWith("I") && Char.IsUpper t.Name.[1] 
     then t.Name.Substring(1)

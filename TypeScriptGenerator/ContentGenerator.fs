@@ -108,7 +108,7 @@ module internal ModelContentGenerator =
             let importPath = FilePathGenerator.generatePath t
             let relativePath = FilePathGenerator.getRelativePath currentPath importPath 
             sprintf "import { %s } from '%s';" (TS.getNameWithoutGeneric t) relativePath
-        //todo 同名泛型类型引入？
+        //todo 同名泛型类型引入？可通过TypeNameConverter避免
         
         (
         importedTypes            

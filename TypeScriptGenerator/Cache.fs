@@ -8,8 +8,9 @@ let internal importedTypes = Dictionary<Type,HashSet<Type>>()
 
 let getImportTypes (t:Type) =
     match importedTypes.TryGetValue t with
-    | true,v -> v
+    | true, v -> v
     | false,_ ->
-        let v = HashSet<Type>()
-        importedTypes.[t] <- v
+        let v = HashSet<Type> ()
+        importedTypes.Add (t, v)
         v
+

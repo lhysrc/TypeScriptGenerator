@@ -22,9 +22,6 @@ module internal FileGenerator =
             Type = t
             Path = FilePathGenerator.generatePath t
             CodeSnippets = getCodeSnippets opts.CodeSnippets t
-            //PropertyFilter = if isNull opts.PropertyFilter then fun _ -> true else FuncConvert.FromFunc opts.PropertyFilter
-            //PropertyConverter = getConverter opts.PropertyConverter
-            //TypeConverter = getConverter opts.TypeConverter
         }
         let gFunc =
             match o.Type with
@@ -45,8 +42,8 @@ module internal FileGenerator =
 
     let generateFile (opts:ModelGenerateOptions) (t:Type) =       
         match cache.TryGetValue t with
-        | true , v -> v
+        | true, v -> v
         | _ -> 
             let v = generateFile' opts t
-            cache.[t]<-v
+            cache.Add (t,v)
             v
