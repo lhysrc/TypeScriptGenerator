@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module String
+module internal String
 
 open System
 open System.Text

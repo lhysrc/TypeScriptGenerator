@@ -17,6 +17,12 @@ module internal FileGenerator =
                |> Array.map (fun line -> TS.indent + line.Trim())
                |> List.ofArray
 
+    let private getConverter (x: Func<'a,string>) (t:'a) =
+        if isNull x then None
+        else
+           match x.Invoke t with
+           | null -> None
+           | result -> Some result
 
     let private generateFile' (opts:ModelGenerateOptions) (t:Type) =         
         let o :TypeOptions = {
@@ -24,7 +30,8 @@ module internal FileGenerator =
             Path = FilePathGenerator.generatePath t
             CodeSnippets = getCodeSnippets opts.CodeSnippets t
             PropertyFilter = if isNull opts.PropertyFilter then fun _ -> true else FuncConvert.FromFunc opts.PropertyFilter
-            PropertyConverter = if isNull opts.PropertyConverter then None else Some (FuncConvert.FromFunc opts.PropertyConverter)
+            PropertyConverter = getConverter opts.PropertyConverter
+            TypeConverter = getConverter opts.TypeConverter
         }
         let gFunc =
             match o.Type with

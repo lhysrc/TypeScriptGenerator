@@ -37,9 +37,18 @@ namespace Runner
                 {
                     opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
                     opt.PropertyFilter = p => p.Name != "IgnoreMe" && !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
-                    opt.CodeSnippets = t => t.GetCustomAttributes().Any(a => a.GetType().Name == "DynamicValidateAttribute") ? @$"
-                      static _assemblyName = ""{t.Assembly.GetName().Name}"";
-                      static _className = ""{t.FullName}"";" : null;
+                    opt.CodeSnippets = t =>
+                    {
+                        if (t.GetCustomAttributes().Any(a => a.GetType().Name == "DynamicValidateAttribute"))
+                            return @$"static _assemblyName = ""{t.Assembly.GetName().Name}"";
+                                      static _className = ""{t.FullName}"";";
+                        else if (t.IsInterface)
+                            return "// interface snippets";
+                        else if (t.IsAbstract &&  t.IsSealed)
+                            return "// const class snippets";
+                        else
+                            return null;
+                    };
                 }
             );
         }

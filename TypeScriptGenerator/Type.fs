@@ -1,4 +1,4 @@
-﻿module Type
+﻿module internal Type
 open System
 open System.Collections.Generic
 

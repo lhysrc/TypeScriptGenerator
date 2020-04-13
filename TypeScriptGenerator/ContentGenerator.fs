@@ -59,6 +59,7 @@ module internal EnumContentGenerator =
         String.concat Environment.NewLine [
             typeName
             TS.indent + fields
+            yield! o.CodeSnippets
             "}"
         ]
         ,List.empty<Type>
@@ -94,7 +95,7 @@ module internal ConstContentGenerator =
 
         let nests = t.GetNestedTypes() |> Array.map (generateNests String.Empty) |> Array.toList
 
-        String.concat Environment.NewLine (fields :: nests),
+        String.concat Environment.NewLine (fields :: nests @ o.CodeSnippets),
         List.empty<Type>
 
 
