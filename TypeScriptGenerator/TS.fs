@@ -83,9 +83,9 @@ let (|TSArray|_|) (t:Type) =
     getCollectionType t
 
 let getNameWithoutGeneric (t:Type) =
-    match Configuration.converteTypeName t with
-    | Some n -> n
-    | None -> Type.getNameWithoutGeneric t
+    t 
+    |> Configuration.converteTypeName
+    |> Option.defaultValue (Type.getNameWithoutGeneric t)
 
 let rec getName (imports:Type HashSet) (t:Type):string =    
     match (unwrap t) with

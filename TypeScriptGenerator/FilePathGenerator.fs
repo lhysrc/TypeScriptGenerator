@@ -7,8 +7,10 @@ module internal FilePathGenerator =
     let private getDirName (name:string) =
         String.toKebabCase name
 
-    let getFileName (t:Type) =        
-        Type.getName t
+    let getFileName (t:Type) =   
+        t
+        |> Configuration.converteTypeName
+        |> Option.defaultValue (Type.getName t)
         |> String.toKebabCase
 
     let generatePath (t:Type) =
