@@ -50,7 +50,12 @@ namespace Runner
                             return null;
                     };
                     opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
-                    opt.TypeConverter = t => t == typeof(Guid) ? "number[]" : null;
+                    opt.TypeConverter = type => type switch
+                    {
+                        Type t when t == typeof(Guid) => "number[]",
+                        Type t when t.BaseType?.Name == "Enumeration" => "number",
+                        _ => null,
+                    };
                     opt.TypeNameConverter = t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IImportMe<>) ? "ImportMeInterface" : null;
                 }
             );

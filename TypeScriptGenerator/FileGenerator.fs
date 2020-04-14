@@ -40,10 +40,11 @@ module internal FileGenerator =
             ImportedTypes = imports
         }
 
-    let generateFile (opts:ModelGenerateOptions) (t:Type) =       
-        match cache.TryGetValue t with
-        | true, v -> v
-        | _ -> 
-            let v = generateFile' opts t
-            cache.Add (t,v)
-            v
+    let generateFile (opts:ModelGenerateOptions) =       
+        Cache.memoize (generateFile' opts)
+        //match cache.TryGetValue t with
+        //| true, v -> v
+        //| _ -> 
+        //    let v = generateFile' opts t
+        //    cache.Add (t,v)
+        //    v
