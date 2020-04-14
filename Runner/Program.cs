@@ -35,8 +35,8 @@ namespace Runner
                 "../ts.g",
                 opt =>
                 {
-                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
-                    opt.PropertyFilter = p => p.Name != "IgnoreMe" && !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
+                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed) || t.IsInterface;
+                    opt.PropertyFilter = p => !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
                     opt.CodeSnippets = t =>
                     {
                         if (t.GetCustomAttributes().Any(a => a.GetType().Name == "DynamicValidateAttribute"))
@@ -52,7 +52,7 @@ namespace Runner
                     opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
                     opt.TypeConverter = type => type switch
                     {
-                        Type t when t == typeof(Guid) => "number[]",
+                        Type t when t == typeof(byte[]) => "string",
                         Type t when t.BaseType?.Name == "Enumeration" => "number",
                         _ => null,
                     };
@@ -62,7 +62,7 @@ namespace Runner
         }
     }
 
-    public class Item : BaseItem, IViewModel
+    public class Item : BaseItem, IViewModel, IHasIgnore
     {
         public Guid Id { get; set; }
         public string Text { get; set; }
@@ -78,10 +78,11 @@ namespace Runner
         public DateTime Date { get; set; }
         public string Hello => "Hello World!";
         public byte[] File { get; set; }
-
+        [JsonIgnore]
         public string IgnoreMe { get; set; }
         [PropertyName("hasBeenRename")]
         public string RenameMe { get; set; }
+        public string WhatIs { get; set; }
     }
 
     public class GenericItem<TStuff> : IImportMe<Item>
@@ -91,7 +92,7 @@ namespace Runner
         public Item X { get; set; }
     }
 
-    public class BaseItem : IImportMe<Item>
+    public abstract class BaseItem : IImportMe<Item>
     {
         public ImportMe Imported { get; set; }
         public Item X { get; set; }
@@ -136,6 +137,10 @@ namespace Runner
        
         public string Name { get; }
     }
+    [System.AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    sealed class JsonIgnoreAttribute : Attribute
+    {
+    }
 }
 namespace Runner.ForImport
 {
@@ -149,5 +154,11 @@ namespace Runner.ForImport
     }
     public interface IImportMe3<T, T1, T2>
     {
+    }
+
+    public interface IHasIgnore
+    {
+        public string IgnoreMe { get; set; }
+        public string WhatIs { get; set; }
     }
 }

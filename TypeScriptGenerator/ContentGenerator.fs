@@ -5,6 +5,14 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module private ContentGenerator =
+    let getProperties (t:Type) =
+        t.GetProperties()
+        |> Seq.filter (fun p -> p.DeclaringType = t)
+        |> Seq.filter Configuration.filterProperty
+    let getPropertyName p =
+        match Configuration.converteProperty p with
+        | Some n -> n
+        | None   -> p.Name |> String.toCamelCase
     let generateExportType (imports:Type HashSet) (t: Type) =
         let typeString =             
             match t with
@@ -18,9 +26,12 @@ module private ContentGenerator =
             else Some ("extends " + TS.getName imports t.BaseType)
         
         let implString =
-            if t.IsEnum then None
+            if not t.IsInterface then None
+            //if t.IsEnum then None
             else 
-                let ifs = t.GetInterfaces()
+                let ifs = 
+                    t.GetInterfaces()
+                    //|> Seq.filter (fun i -> Seq.forall (fun ip -> Seq.exists (fun tp -> getPropertyName ip = getPropertyName tp) (getProperties t)) (getProperties i))
                 let baseIfs = if isNull t.BaseType then Array.empty<Type> else t.BaseType.GetInterfaces()
                 let ifsString =
                     ifs
@@ -118,10 +129,7 @@ module internal ModelContentGenerator =
         + Environment.NewLine
 
     let generateProp (ts:Type HashSet) (p:PropertyInfo) =
-        let name =
-            match Configuration.converteProperty p with
-            | Some n -> n
-            | None   -> p.Name |> String.toCamelCase
+        let name = getPropertyName p
         let typeName = TS.getName ts p.PropertyType
 
         String.concat "" [
@@ -138,9 +146,8 @@ module internal ModelContentGenerator =
         let t = o.Type
         let typeName = generateExportType ``importedTypes&this`` t
         let props = 
-            t.GetProperties()
-            |> Seq.filter (fun p -> p.DeclaringType = t)
-            |> Seq.filter Configuration.filterProperty
+            t
+            |> getProperties
             |> Seq.map (generateProp ``importedTypes&this``)
             |> String.concat Environment.NewLine
         
