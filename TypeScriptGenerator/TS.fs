@@ -58,11 +58,9 @@ let isBuildIn (t:Type) =
     buildinTypes |> List.exists (fun i->i.Key = t)
 
 let addImportType (ts:Type HashSet) (t:Type) =
-    let t' = (*unwrap*) t
-    if (*isBuildIn t' ||*) t.IsGenericParameter then ()
+    if t.IsGenericParameter then ()
     else if t.IsGenericType then ts.Add (t.GetGenericTypeDefinition()) |> ignore
-    else ts.Add t' |> ignore
-
+    else ts.Add t |> ignore
 
 let (|TSBuildIn|_|) (t:Type) = 
     match Configuration.converteType t with
