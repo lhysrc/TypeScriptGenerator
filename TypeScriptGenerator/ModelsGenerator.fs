@@ -60,9 +60,11 @@ module ModelsGenerator =
         |> Seq.iter (fun (dir,files) -> 
             files 
             |> Seq.map (fun f -> 
-                sprintf "export *%s from \"./%s\";" 
-                    (if Type.isStatic f.Type then " as " + TS.getNameWithoutGeneric(f.Type) else String.Empty)
-                    (Path.GetFileNameWithoutExtension f.FullPath)   )
+                if Type.isStatic f.Type then 
+                    String.format "import * as {0} from \"./{1}\";{2}export {{ {0} }};"
+                        [TS.getNameWithoutGeneric(f.Type);(Path.GetFileNameWithoutExtension f.FullPath);Environment.NewLine]
+                else 
+                    sprintf "export * from \"./%s\";" (Path.GetFileNameWithoutExtension f.FullPath) )
             |> String.concat Environment.NewLine
             |> writeFile (Path.Combine(dir, "index.ts"))                )
 
