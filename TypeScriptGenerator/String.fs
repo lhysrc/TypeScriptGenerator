@@ -78,5 +78,5 @@ let toCamelCase (s:string) =
         | None -> Array.map (fun (_,c)->c) breaks
         |> String
 
-let format fm (args:obj seq) =
-    String.Format(fm, args |> Seq.toArray);
+let format fmt (args:obj seq) =
+    String.Format(fmt, args |> Seq.toArray);

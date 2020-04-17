@@ -1,11 +1,8 @@
 namespace TypeScriptGenerator
 open System
 open System.IO
-open System.Collections.Generic
 
 module internal FileGenerator =
-
-    let private cache = Dictionary<Type, TSFile>()
 
     let private getCodeSnippets (x: Func<Type, string>) (t:Type) =
         if isNull x then List.empty
@@ -42,9 +39,3 @@ module internal FileGenerator =
 
     let generateFile (opts:ModelGenerateOptions) =       
         Cache.memoize (generateFile' opts)
-        //match cache.TryGetValue t with
-        //| true, v -> v
-        //| _ -> 
-        //    let v = generateFile' opts t
-        //    cache.Add (t,v)
-        //    v

@@ -9,10 +9,12 @@ module private ContentGenerator =
         t.GetProperties()
         |> Seq.filter (fun p -> p.DeclaringType = t)
         |> Seq.filter Configuration.filterProperty
+
     let getPropertyName p =
         match Configuration.converteProperty p with
         | Some n -> n
         | None   -> p.Name |> String.toCamelCase
+
     let generateExportType (imports:Type HashSet) (t: Type) =
         let typeString =             
             match t with
@@ -113,7 +115,6 @@ module internal ConstContentGenerator =
 
 
 module internal ModelContentGenerator =   
-
     let generateImports (currentPath:string) (importedTypes:Type seq) =
         let generateImport (t:Type) =
             let importPath = FilePathGenerator.generatePath t
@@ -128,7 +129,7 @@ module internal ModelContentGenerator =
         )
         + Environment.NewLine
 
-    let generateProp (ts:Type HashSet) (p:PropertyInfo) =
+    let generateProperty (ts:Type HashSet) (p:PropertyInfo) =
         let name = getPropertyName p
         let typeName = TS.getName ts p.PropertyType
 
@@ -148,7 +149,7 @@ module internal ModelContentGenerator =
         let props = 
             t
             |> getProperties
-            |> Seq.map (generateProp ``importedTypes&this``)
+            |> Seq.map (generateProperty ``importedTypes&this``)
             |> String.concat Environment.NewLine
         
         //printfn "%s" "-------------"
