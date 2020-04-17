@@ -35,7 +35,7 @@ namespace Runner
                 "../ts.g",
                 opt =>
                 {
-                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed) || t.IsInterface;
+                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
                     opt.PropertyFilter = p => !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
                     opt.CodeSnippets = t =>
                     {
@@ -52,8 +52,9 @@ namespace Runner
                     opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
                     opt.TypeConverter = type => type switch
                     {
-                        Type t when t == typeof(byte[]) => "string",
-                        Type t when t.BaseType?.Name == "Enumeration" => "number",
+                        Type t when t == typeof(byte[]) => typeof(string),
+                        Type t when t == typeof(ListEx) => typeof(List<string>),
+                        Type t when t.BaseType?.Name == "Enumeration" => typeof(int),
                         _ => null,
                     };
                     opt.TypeNameConverter = t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IImportMe<>) ? "ImportMeInterface" : null;
@@ -68,6 +69,7 @@ namespace Runner
         public string Text { get; set; }
         public bool IsWhatever { get; set; }
         public IEnumerable<string> Collection { get; set; }
+        public ListEx List { get; set; }
         public double[] Array { get; set; }
         public (int, string) ValueTuple { get; set; }
         public Tuple<int, string> Tuple { get; set; }
@@ -84,7 +86,10 @@ namespace Runner
         public string RenameMe { get; set; }
         public string WhatIs { get; set; }
     }
+    public class ListEx
+    {
 
+    }
     public class GenericItem<TStuff> : IImportMe<Item>
     {
         public TStuff Stuff { get; set; }

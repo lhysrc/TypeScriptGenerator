@@ -14,7 +14,8 @@ module internal FileGenerator =
                |> Array.map (fun line -> TS.indent + line.Trim())
                |> List.ofArray
 
-    let private generateFile' (opts:ModelGenerateOptions) (t:Type) =         
+    let private generateFile' (opts:ModelGenerateOptions) (t':Type) =         
+        let t = t' |> Configuration.converteType |> Option.defaultValue t'
         let o :TypeOptions = {
             Type = t
             Path = FilePathGenerator.generatePath t

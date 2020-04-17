@@ -8,7 +8,7 @@ let mutable filterProperty: PropertyInfo -> bool =
     fun _ -> true
 let mutable converteProperty: PropertyInfo -> string option = 
     fun _ -> None
-let mutable converteType: Type -> string option =  //Type -> Type  全局类型替换
+let mutable converteType: Type -> Type option =
     fun _ -> None
 let mutable converteTypeName: Type -> string option = 
     fun _ -> None

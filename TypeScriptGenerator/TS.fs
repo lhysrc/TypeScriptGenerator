@@ -63,9 +63,9 @@ let addImportType (ts:Type HashSet) (t:Type) =
     else ts.Add t |> ignore
 
 let (|TSBuildIn|_|) (t:Type) = 
-    match Configuration.converteType t with
-    | Some n -> Some n // tsBuildIns |> List.tryFind (fun i-> n = i)
-    | None   -> 
+    //match Configuration.converteType t with
+    //| Some n -> Some n // tsBuildIns |> List.tryFind (fun i-> n = i)
+    //| None   -> 
     match buildinTypes |> List.tryFind (fun i->i.Key = t) with
     | Some st -> Some st.Value
     | None    -> None
@@ -86,7 +86,7 @@ let getNameWithoutGeneric (t:Type) =
     |> Option.defaultValue (Type.getNameWithoutGeneric t)
 
 let rec getName (imports:Type HashSet) (t:Type):string =    
-    match (unwrap t) with
+    match t |> unwrap |> Configuration.converteType |> Option.defaultValue t with
     | TSBuildIn n -> n
     | TSTuple ts -> 
         "[" + (
@@ -96,7 +96,7 @@ let rec getName (imports:Type HashSet) (t:Type):string =
         ) + "]"
     | TSMap (k,v) -> 
         match k with
-        | k when k = typeof<string> -> "{ [key: string]: " + (getName imports v) + " }"
+        | k when k = typeof<string> -> "{ [key: string]: " + (getName imports v) + " }" //todo number & guid etc.
         | _ -> sprintf "Map<%s,%s>" (getName imports k)(getName imports v)
     | TSArray t -> (getName imports t) + "[]"
     | t -> 
