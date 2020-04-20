@@ -3,59 +3,60 @@ open Type
 open System
 open System.Collections.Generic
 
-type SystemType = {
-    Key : Type
-    Value :string
+type TSBuildInType = {
+    TypeName :string
+    InitValue:string option
 }
+
 let indent = "  ";
-let private buildinTypes = [
-    {Key = typeof<Void>;Value = "void"}
-    {Key = typeof<obj>;Value = "any"}
 
-    {Key = typeof<String>;Value = "string"}
-    {Key = typeof<Char>;Value = "string"}
-    {Key = typeof<Nullable<Char>>;Value = "string"}
-    {Key = typeof<Guid>;Value = "string"}
-    {Key = typeof<Nullable<Guid>>;Value = "string"}
-    {Key = typeof<Uri>;Value = "string"}
+let private buildinTypes = readOnlyDict [
+    typeof<Void>,           {TypeName = "void";InitValue = None}
+    typeof<obj>,            {TypeName = "any"; InitValue = None}
 
+    typeof<String>,         {TypeName = "string";InitValue = None}
+    typeof<Char>,           {TypeName = "string";InitValue = None}
+    typeof<Guid>,           {TypeName = "string";InitValue = None}
+    //typeof<Nullable<Char>>, {TypeName = "string";InitValue = None}
+    //typeof<Nullable<Guid>>, {TypeName = "string";InitValue = None}
+    
+    typeof<Uri>,            {TypeName = "string";InitValue = None}
 
-    {Key = typeof<int>;Value = "number"}
-    {Key = typeof<Nullable<int>>;Value = "number"}
-    {Key = typeof<uint32>;Value = "number"}
-    {Key = typeof<Nullable<uint32>>;Value = "number"}
-    {Key = typeof<int8>;Value = "number"}
-    {Key = typeof<Nullable<int8>>;Value = "number"}
-    {Key = typeof<uint8>;Value = "number"}
-    {Key = typeof<Nullable<uint8>>;Value = "number"}
-    {Key = typeof<int16>;Value = "number"}
-    {Key = typeof<Nullable<int16>>;Value = "number"}
-    {Key = typeof<uint16>;Value = "number"}
-    {Key = typeof<Nullable<uint16>>;Value = "number"}
-    {Key = typeof<int64>;Value = "number"}
-    {Key = typeof<Nullable<int64>>;Value = "number"}
-    {Key = typeof<uint64>;Value = "number"}
-    {Key = typeof<Nullable<uint64>>;Value = "number"}
+    typeof<int8>,           {TypeName = "number";InitValue = Some "0"}
+    typeof<uint8>,          {TypeName = "number";InitValue = Some "0"}
+    typeof<int16>,          {TypeName = "number";InitValue = Some "0"}
+    typeof<uint16>,         {TypeName = "number";InitValue = Some "0"}
+    typeof<int32>,          {TypeName = "number";InitValue = Some "0"}
+    typeof<uint32>,         {TypeName = "number";InitValue = Some "0"}
+    typeof<int64>,          {TypeName = "number";InitValue = Some "0"}
+    typeof<uint64>,         {TypeName = "number";InitValue = Some "0"}
+    //typeof<Nullable<int32>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<uint32>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<int8>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<uint8>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<int16>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<uint16>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<int64>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<uint64>>,{TypeName = "number";InitValue = None}
 
-    {Key = typeof<float>;Value = "number"}
-    {Key = typeof<Nullable<float>>;Value = "number"}
-    {Key = typeof<float32>;Value = "number"}
-    {Key = typeof<Nullable<float32>>;Value = "number"}
-    {Key = typeof<decimal>;Value = "number"}
-    {Key = typeof<Nullable<decimal>>;Value = "number"}
+    typeof<float>,          {TypeName = "number";InitValue = Some "0"}
+    typeof<float32>,        {TypeName = "number";InitValue = Some "0"}
+    typeof<decimal>,        {TypeName = "number";InitValue = Some "0"}
+    //typeof<Nullable<float>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<float32>>,{TypeName = "number";InitValue = None}
+    //typeof<Nullable<decimal>>,{TypeName = "number";InitValue = None}
 
-    {Key = typeof<bool>;Value = "boolean"}
-    {Key = typeof<Nullable<bool>>;Value = "boolean"}
+    typeof<bool>,           {TypeName = "boolean";InitValue = Some "false"}
+    //typeof<Nullable<bool>>,{TypeName = "boolean";InitValue = None}
 
-    {Key = typeof<DateTime>;Value = "Date"}
-    {Key = typeof<Nullable<DateTime>>;Value = "Date"}
-    {Key = typeof<DateTimeOffset>;Value = "Date"}
-    {Key = typeof<Nullable<DateTimeOffset>>;Value = "Date"}
+    typeof<DateTime>,       {TypeName = "Date";InitValue = Some "new Date()"}
+    typeof<DateTimeOffset>, {TypeName = "Date";InitValue = Some "new Date()"}
+    //typeof<Nullable<DateTime>>,{TypeName = "Date";InitValue = None}
+    //typeof<Nullable<DateTimeOffset>>,{TypeName = "Date";InitValue = None}
 ]
-//let private cache = dict Seq.empty<Type * string>;
    
 let isBuildIn (t:Type) =
-    buildinTypes |> List.exists (fun i->i.Key = t)
+    buildinTypes.ContainsKey t
 
 let addImportType (ts:Type HashSet) (t:Type) =
     if t.IsGenericParameter then ()
@@ -63,12 +64,9 @@ let addImportType (ts:Type HashSet) (t:Type) =
     else ts.Add t |> ignore
 
 let (|TSBuildIn|_|) (t:Type) = 
-    //match Configuration.converteType t with
-    //| Some n -> Some n // tsBuildIns |> List.tryFind (fun i-> n = i)
-    //| None   -> 
-    match buildinTypes |> List.tryFind (fun i->i.Key = t) with
-    | Some st -> Some st.Value
-    | None    -> None
+    match buildinTypes.TryGetValue t with
+    | true, v -> Some v.TypeName
+    | false,_ -> None
 
 let (|TSTuple|_|) (t:Type) =
     if Reflection.FSharpType.IsTuple t then Some (Reflection.FSharpType.GetTupleElements t)
