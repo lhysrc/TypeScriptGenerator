@@ -85,8 +85,9 @@ let getNameWithoutGeneric (t:Type) =
     |> Configuration.converteTypeName
     |> Option.defaultValue (Type.getNameWithoutGeneric t)
 
-let rec getName (imports:Type HashSet) (t:Type):string =    
-    match t |> unwrap |> Configuration.converteType |> Option.defaultValue t with
+let rec getName (imports:Type HashSet) (t':Type):string =    
+    let t = t' |> unwrap
+    match t |> Configuration.converteType |> Option.defaultValue t with
     | TSBuildIn n -> n
     | TSTuple ts -> 
         "[" + (
