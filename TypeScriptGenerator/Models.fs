@@ -19,6 +19,7 @@ type internal TypeOptions = {
     //PropertyConverter: PropertyInfo -> string option //todo
     //TypeConverter: Type -> string option //todo
     CodeSnippets: string list
+    XmlDocs : Map<string, string option>
 }
 
 type internal TSFile = {
