@@ -14,6 +14,7 @@
     <Compile Include="Models.fs" />
     <Compile Include="Cache.fs" />
     <Compile Include="Configuration.fs" />
+    <Compile Include="DocGenerator.fs" /> <!-- Added this line -->
     <Compile Include="TS.fs" />
     <Compile Include="FilePathGenerator.fs" />
     <Compile Include="ContentGenerator.fs" />

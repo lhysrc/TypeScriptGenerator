@@ -6,6 +6,7 @@ type ModelGenerateOptions (dest: string) =
     member val Destination: string = dest with get
     member val TypeFilter: Func<Type, bool> = null with get, set
     member val CodeSnippets: Func<Type, string> = null with get, set
+    member val EnableJsDoc: bool = false with get, set // Added EnableJsDoc, default to false
 
     member val PropertyFilter: Func<PropertyInfo, bool> = null with get, set
     member val PropertyConverter: Func<PropertyInfo, string> = null with get, set

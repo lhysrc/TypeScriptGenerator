@@ -2,6 +2,8 @@
 open System
 open System.IO
 open System.Reflection
+open System.Xml.Linq // Added for XML parsing
+open Configuration    // Added for xmlDocs and addXmlDoc
 
 open FileGenerator
 
@@ -32,6 +34,36 @@ module ModelsGenerator =
         Configuration.setOptions opts
         let sw = System.Diagnostics.Stopwatch()
         sw.Start()
+
+        // Load XML documentation
+        for assembly in assemblies do
+            try
+                if not assembly.IsDynamic then // Dynamic assemblies typically don't have a location or XML docs
+                    let assemblyPath = assembly.Location
+                    if not (String.IsNullOrWhiteSpace assemblyPath) then
+                        let xmlPath = Path.ChangeExtension(assemblyPath, ".xml")
+                        if File.Exists xmlPath then
+                            let xmlDoc = XDocument.Load(xmlPath)
+                            match xmlDoc.Root.Element("members") with
+                            | null -> 
+                                printfn "Warning: XML documentation file at '%s' does not contain a <members> root element." xmlPath
+                            | membersElement ->
+                                for memberEl in membersElement.Elements("member") do
+                                    match memberEl.Attribute("name") with
+                                    | null -> () // Member tag without a name attribute, skip.
+                                    | nameAttr ->
+                                        let memberContent = memberEl.Value.Trim() // .Value gets inner text of the <member> node
+                                        if not (String.IsNullOrWhiteSpace memberContent) then
+                                            Configuration.addXmlDoc nameAttr.Value memberContent
+                        else
+                            // It's common for XML docs to be missing, so this might be too verbose if not a warning.
+                            // Depending on requirements, this could be a more silent failure or a configurable warning.
+                            printfn "FYI: XML documentation file not found for assembly: '%s' (expected at '%s')" assembly.FullName xmlPath
+                    else
+                        printfn "Warning: Assembly location is null or empty for '%s'. Skipping XML documentation loading." assembly.FullName
+            with
+            | ex -> 
+                printfn "Error loading XML documentation for assembly '%s': %s" assembly.FullName ex.Message
 
         let loadedTypes =
             assemblies 

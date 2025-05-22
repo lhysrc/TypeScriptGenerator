@@ -1,4 +1,4 @@
-﻿module internal Configuration
+module internal Configuration
 
 open System
 open System.Reflection
@@ -13,6 +13,7 @@ let mutable converteType: Type -> Type option =
 let mutable converteTypeName: Type -> string option = 
     fun _ -> None
 
+let mutable currentEnableJsDoc = false // Added to store EnableJsDoc flag, defaults to false
 
 let private getConverter (x: Func<'a, 'result>) (t:'a) =
     if isNull x then None
@@ -26,3 +27,10 @@ let setOptions (opts:ModelGenerateOptions) =
     converteProperty <- getConverter opts.PropertyConverter
     converteType <- getConverter opts.TypeConverter
     converteTypeName <- getConverter opts.TypeNameConverter
+    currentEnableJsDoc <- opts.EnableJsDoc // Set the flag based on options
+
+let xmlDocs = System.Collections.Generic.Dictionary<string, string>()
+
+let addXmlDoc (key: string) (doc: string) =
+    if not (xmlDocs.ContainsKey key) then
+        xmlDocs.Add(key, doc)
