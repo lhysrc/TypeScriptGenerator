@@ -14,11 +14,17 @@ namespace Runner
             using var tempDir = new TempDir();
 
             TypeScriptGenerator.ModelsGenerator.Generate(
-                new[] { assembly },
+                [assembly],
                 tempDir.Path,
                 opt =>
                 {
                     opt.TypeFilter = t => t == typeof(Item);
+                    opt.PropertyConverter = p =>
+                        p.GetCustomAttribute<PropertyNameAttribute>()?.Name switch
+                        {
+                            { } name => name,
+                            _ => null
+                        };
                 });
 
             var file = Path.Combine(tempDir.Path, "runner", "item.ts");
@@ -36,7 +42,7 @@ namespace Runner
             using var tempDir = new TempDir();
 
             TypeScriptGenerator.ModelsGenerator.Generate(
-                new[] { assembly },
+                [assembly],
                 tempDir.Path,
                 opt =>
                 {
@@ -57,7 +63,7 @@ namespace Runner
             using var tempDir = new TempDir();
 
             TypeScriptGenerator.ModelsGenerator.Generate(
-                new[] { assembly },
+                [assembly],
                 tempDir.Path,
                 opt =>
                 {
@@ -86,7 +92,10 @@ namespace Runner
             {
                 Directory.Delete(Path, true);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }
