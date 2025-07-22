@@ -3,14 +3,14 @@ open Type
 open System
 open System.Collections.Generic
 
-type TSBuildInType = {
+type TSBuiltinType = {
     TypeName :string
     InitValue:string option
 }
 
 let indent = "  ";
 
-let private buildinTypes = readOnlyDict [
+let private builtinTypes = readOnlyDict [
     typeof<Void>,           {TypeName = "void";InitValue = None}
     typeof<obj>,            {TypeName = "any"; InitValue = None}
 
@@ -55,16 +55,16 @@ let private buildinTypes = readOnlyDict [
     //typeof<Nullable<DateTimeOffset>>,{TypeName = "Date";InitValue = None}
 ]
    
-let isBuildIn (t:Type) =
-    buildinTypes.ContainsKey t
+let isBuiltin (t:Type) =
+    builtinTypes.ContainsKey t
 
 let addImportType (ts:Type HashSet) (t:Type) =
     if t.IsGenericParameter then ()
     else if t.IsGenericType then ts.Add (t.GetGenericTypeDefinition()) |> ignore
     else ts.Add t |> ignore
 
-let (|TSBuildIn|_|) (t:Type) = 
-    match buildinTypes.TryGetValue t with
+let (|TSBuiltin|_|) (t:Type) =
+    match builtinTypes.TryGetValue t with
     | true, v -> Some v.TypeName
     | false,_ -> None
 
@@ -86,7 +86,7 @@ let getNameWithoutGeneric (t:Type) =
 let rec getName (imports:Type HashSet) (t':Type):string =    
     let t = t' |> unwrap
     match t |> Configuration.converteType |> Option.defaultValue t with
-    | TSBuildIn n -> n
+    | TSBuiltin n -> n
     | TSTuple ts -> 
         "[" + (
             ts 
