@@ -1,67 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
 using Runner.ForImport;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using TypeScriptGenerator;
 
 namespace Runner
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Program>();
-            var configuration = builder.Build();
-            var root = configuration["root"];
-
-            var asmNames = new string[]
-            {
-                "QiaoDan.Core.dll",
-                "QiaoDan.ViewModels.Abstractions.dll",
-                "QiaoDan.Admin.ViewModels.dll",
-                "QiaoDan.OA.Core.dll",
-                "QiaoDan.OA.ViewModels.dll",
-                "QiaoDan.HR.Core.dll",
-                "QiaoDan.HR.ViewModels.dll",
-            }
-            ;
-
-            ModelsGenerator.Generate(
-                asmNames.Select(n => Assembly.LoadFrom(Path.Combine(root, n))).Append(typeof(Program).Assembly),
-                "../ts.g",
-                opt =>
-                {
-                    opt.TypeFilter = t => t.GetInterface("IViewModel") != null || t.IsEnum || (t.IsAbstract && t.IsSealed);
-                    opt.PropertyFilter = p => !p.GetCustomAttributes().Any(a => a.GetType().Name == "JsonIgnoreAttribute");
-                    opt.CodeSnippets = t =>
-                    {
-                        if (t.GetCustomAttributes().Any(a => a.GetType().Name == "DynamicValidateAttribute"))
-                            return @$"static _assemblyName = ""{t.Assembly.GetName().Name}"";
-                                      static _className = ""{t.FullName}"";";
-                        else if (t.IsInterface)
-                            return "// interface snippets";
-                        else if (t.IsAbstract &&  t.IsSealed)
-                            return "// const class snippets";
-                        else
-                            return null;
-                    };
-                    opt.PropertyConverter = p => p.GetCustomAttribute<PropertyNameAttribute>()?.Name;
-                    opt.TypeConverter = type => type switch
-                    {
-                        Type t when t == typeof(byte[]) => typeof(string),
-                        Type t when t == typeof(ListEx) => typeof(List<string>),
-                        Type t when t.BaseType?.Name == "Enumeration" => typeof(int),
-                        _ => null,
-                    };
-                    opt.TypeNameConverter = t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IImportMe<>) ? "ImportMeInterface" : null;
-                }
-            );
-        }
-    }
 
     public class Item : BaseItem, IViewModel, IHasIgnore
     {
@@ -125,6 +67,12 @@ namespace Runner
     {
         public const string ConstString = "ConstString";
         public const int ConstInt = 1314520;
+    }
+
+    public enum Status
+    {
+        None = 0,
+        Done = 1
     }
 
     interface IViewModel : IImportMe3<IImportMe<BaseItem>, int, string>
