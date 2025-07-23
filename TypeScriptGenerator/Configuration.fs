@@ -10,8 +10,11 @@ let mutable converteProperty: PropertyInfo -> string option =
     fun _ -> None
 let mutable converteType: Type -> Type option =
     fun _ -> None
-let mutable converteTypeName: Type -> string option = 
+let mutable converteTypeName: Type -> string option =
     fun _ -> None
+let mutable enableXmlDoc: bool = false
+
+let isXmlDocEnabled () = enableXmlDoc
 
 
 let private getConverter (x: Func<'a, 'result>) (t:'a) =
@@ -26,3 +29,4 @@ let setOptions (opts:ModelGenerateOptions) =
     converteProperty <- getConverter opts.PropertyConverter
     converteType <- getConverter opts.TypeConverter
     converteTypeName <- getConverter opts.TypeNameConverter
+    enableXmlDoc <- opts.EnableXmlDoc

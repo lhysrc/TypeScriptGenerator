@@ -2,6 +2,7 @@
 open System
 open System.Reflection
 open System.Collections.Generic
+open Comment
 
 [<AutoOpen>]
 module private ContentGenerator =
@@ -56,20 +57,22 @@ module private ContentGenerator =
         |> List.choose id
         |> String.concat " " 
 
-module internal EnumContentGenerator = 
+module internal EnumContentGenerator =
     let generateContent (o: TypeOptions) =
-        let imports = Cache.getImportTypes o.Type        
+        let imports = Cache.getImportTypes o.Type
         let t = o.Type
         let typeName = generateExportType imports t
+        let comments = Comment.generate "" t
 
-        let fields = 
-            Enum.GetValues(t) 
+        let fields =
+            Enum.GetValues(t)
             |> unbox
             |> Seq.map (fun e -> sprintf "%s = %i" (Enum.GetName(t, e)) e)
             |> String.concat ("," + Environment.NewLine + TS.indent)
 
 
         String.concat Environment.NewLine [
+            yield! comments
             typeName
             TS.indent + fields
             yield! o.CodeSnippets
@@ -104,6 +107,7 @@ module internal ConstContentGenerator =
 
     let generateContent (o: TypeOptions) =
         let t = o.Type
+        let comments = Comment.generate "" t
         let fields = generateFields String.Empty t
 
         let nests = t.GetNestedTypes() |> Array.map (generateNests String.Empty) |> Array.toList
@@ -111,7 +115,8 @@ module internal ConstContentGenerator =
         let content =
             if String.IsNullOrEmpty fields && List.isEmpty nests then String.Empty
             else String.concat Environment.NewLine (fields :: nests @ o.CodeSnippets)
-        content, List.empty<Type>
+        let allLines = comments @ [content]
+        String.concat Environment.NewLine allLines, List.empty<Type>
 
 
 module internal ModelContentGenerator =   
@@ -132,21 +137,19 @@ module internal ModelContentGenerator =
     let generateProperty (ts:Type HashSet) (p:PropertyInfo) =
         let name = getPropertyName p
         let typeName = TS.getName ts p.PropertyType
+        let comments = Comment.generate TS.indent p
 
-        String.concat "" [
-            TS.indent
-            name
-            "?: "
-            typeName
-            ";"
-        ]
+        let line = String.concat "" [TS.indent; name; "?: "; typeName; ";"]
+        if List.isEmpty comments then line
+        else String.concat Environment.NewLine (comments @ [line])
          
     let generateContent (o: TypeOptions) =
         let ``importedTypes&this`` = Cache.getImportTypes o.Type        
 
         let t = o.Type
         let typeName = generateExportType ``importedTypes&this`` t
-        let props = 
+        let comments = Comment.generate "" t
+        let props =
             t
             |> getProperties
             |> Seq.map (generateProperty ``importedTypes&this``)
@@ -158,6 +161,7 @@ module internal ModelContentGenerator =
 
         String.concat Environment.NewLine [
             if not importedTypes.IsEmpty then yield generateImports o.Path importedTypes
+            yield! comments
             yield typeName
             yield if String.IsNullOrEmpty props then String.Empty else props
             yield! o.CodeSnippets
