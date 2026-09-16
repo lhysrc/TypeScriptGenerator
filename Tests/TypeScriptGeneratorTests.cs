@@ -76,6 +76,29 @@ namespace Runner
             Assert.Contains("export module Nest", content);
             Assert.Contains("ConstDouble", content);
         }
+
+        [Fact]
+        public void Generate_WithXmlDoc()
+        {
+            var assembly = typeof(Item).GetTypeInfo().Assembly;
+            using var tempDir = new TempDir();
+
+            TypeScriptGenerator.ModelsGenerator.Generate(
+                new[] { assembly },
+                tempDir.Path,
+                opt =>
+                {
+                    opt.TypeFilter = t => t == typeof(Item);
+                    opt.EnableXmlDoc = true;
+                });
+
+            var file = Path.Combine(tempDir.Path, "runner", "item.ts");
+            Assert.True(File.Exists(file));
+            var content = File.ReadAllText(file);
+            Assert.Contains("Item with various properties", content);
+            Assert.Contains("Item identifier", content);
+            Assert.Contains("@deprecated Use SomethingElse", content);
+        }
     }
 
     internal sealed class TempDir : IDisposable

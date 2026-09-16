@@ -5,9 +5,14 @@ using System.Collections.Generic;
 namespace Runner
 {
 
+    /// <summary>
+    /// Item with various properties.
+    /// </summary>
     public class Item : BaseItem, IViewModel, IHasIgnore
     {
+        /// <summary>Item identifier.</summary>
         public Guid Id { get; set; }
+        /// <summary>Some text.</summary>
         public string Text { get; set; }
         public bool IsWhatever { get; set; }
         public IEnumerable<string> Collection { get; set; }
@@ -26,6 +31,8 @@ namespace Runner
         public string IgnoreMe { get; set; }
         [PropertyName("hasBeenRename")]
         public string RenameMe { get; set; }
+        /// <summary>Deprecated property.</summary>
+        [Obsolete("Use SomethingElse")]
         public string WhatIs { get; set; }
     }
     public class ListEx
