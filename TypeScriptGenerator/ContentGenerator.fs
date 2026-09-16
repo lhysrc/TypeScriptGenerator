@@ -25,7 +25,7 @@ module private ContentGenerator =
             | _ ->  "class"
         
         let extendString = 
-            if isNull t.BaseType || TS.isBuildIn t.BaseType || t.IsEnum then None
+            if isNull t.BaseType || TS.isBuiltin t.BaseType || t.IsEnum then None
             else Some ("extends " + TS.getName imports t.BaseType)
         
         let implString =
