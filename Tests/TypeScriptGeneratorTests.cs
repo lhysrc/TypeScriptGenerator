@@ -3,9 +3,7 @@ using System.IO;
 using System.Reflection;
 using Xunit;
 
-using Samples;
-
-namespace TypeScriptGenerator.Tests
+namespace Runner
 {
     public class TypeScriptGeneratorTests
     {
@@ -29,7 +27,7 @@ namespace TypeScriptGenerator.Tests
                         };
                 });
 
-            var file = Path.Combine(tempDir.Path, "samples", "item.ts");
+            var file = Path.Combine(tempDir.Path, "runner", "item.ts");
             Assert.True(File.Exists(file));
             var content = File.ReadAllText(file);
             Assert.Contains("export class Item", content);
@@ -51,7 +49,7 @@ namespace TypeScriptGenerator.Tests
                     opt.TypeFilter = t => t == typeof(Status);
                 });
 
-            var file = Path.Combine(tempDir.Path, "samples", "status.ts");
+            var file = Path.Combine(tempDir.Path, "runner", "status.ts");
             Assert.True(File.Exists(file));
             var content = File.ReadAllText(file);
             Assert.Contains("export enum Status", content);
@@ -72,7 +70,7 @@ namespace TypeScriptGenerator.Tests
                     opt.TypeFilter = t => t == typeof(StaticWithNest);
                 });
 
-            var file = Path.Combine(tempDir.Path, "samples", "static-with-nest.ts");
+            var file = Path.Combine(tempDir.Path, "runner", "static-with-nest.ts");
             Assert.True(File.Exists(file));
             var content = File.ReadAllText(file);
             Assert.Contains("export module Nest", content);
@@ -94,7 +92,7 @@ namespace TypeScriptGenerator.Tests
                     opt.EnableXmlDoc = true;
                 });
 
-            var file = Path.Combine(tempDir.Path, "samples", "item.ts");
+            var file = Path.Combine(tempDir.Path, "runner", "item.ts");
             Assert.True(File.Exists(file));
             var content = File.ReadAllText(file);
             Assert.Contains("Item with various properties", content);
