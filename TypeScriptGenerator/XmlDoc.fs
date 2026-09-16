@@ -31,9 +31,7 @@ let private loadDocs (asm:Assembly) =
         dict
 
 let private typeName (t:Type) =
-    let name = t.FullName.Replace('+', '.')
-    if t.IsGenericType then sprintf "%s`%d" name (t.GetGenericArguments().Length)
-    else name
+    t.FullName.Replace('+', '.')
 
 let private memberId (m:MemberInfo) =
     match m with
