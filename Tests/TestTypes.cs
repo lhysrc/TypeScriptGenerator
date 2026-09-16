@@ -1,8 +1,8 @@
-using Samples.ForImport;
+using Runner.ForImport;
 using System;
 using System.Collections.Generic;
 
-namespace Samples
+namespace Runner
 {
 
     /// <summary>
@@ -32,7 +32,7 @@ namespace Samples
         [PropertyName("hasBeenRename")]
         public string RenameMe { get; set; }
         /// <summary>Deprecated property.</summary>
-        [Obsolete("Use SomethingElse")] 
+        [Obsolete("Use SomethingElse")]
         public string WhatIs { get; set; }
     }
     public class ListEx
@@ -102,7 +102,7 @@ namespace Samples
     {
     }
 }
-namespace Samples.ForImport
+namespace Runner.ForImport
 {
     public class ImportMe
     {
